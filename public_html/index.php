@@ -1,6 +1,10 @@
 <?php
     // login button for spotify
     // handle errors
+    // check origin of request coming from deej-ai.online
+    // log
+    // rotate screen in app?
+    // cookies
 
     require '../vendor/autoload.php';
 
@@ -40,6 +44,8 @@
             'creativity' => '1',
             'noise' => '0'
         ];
+
+        // create file that gets deleted if user goes away
         if (isset($client_id)) {
             $file = fopen($ids_dir .'/' . $client_id, 'w');
             fclose($file);
@@ -48,6 +54,7 @@
         $payload = json_encode($postdata); 
 
         $ch = curl_init($spotify_server);
+        // stream results
         ob_implicit_flush(true);
         ob_end_flush();
 
@@ -116,7 +123,7 @@
     }
 
     if (isset($_GET['code'])) {
-        // get access token from callback url code
+        // get refresh token from callback url code
         $session->requestAccessToken($_GET['code']);
         header('Location: http://' . $_SERVER['SERVER_NAME'] . '?' . http_build_query([
             'token' => $session->getRefreshToken()
@@ -124,120 +131,131 @@
         die();
     }
 
-    if (isset($_GET['token'])) {        
+    if (isset($_GET['token'])) {
+        // get access token from refresh token
         $session->refreshAccessToken($_GET['token']);
-        if (!isset($_POST['action'])) {
-            // load page
+    }
+
+    if (!isset($_POST['action'])) {
+        // load page
+
 ?>
 <!doctype html>
 <html lang='en'>
-    <head>
-        <script src='//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>    
-    </head>
+<head>
+    <script src='//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>    
+</head>
 
-    <body>
-        <input type='submit' class='button' id='go' value='go' />
-        <input type='submit' class='button' id='search' value='search' />
-        <input type='submit' class='button' id='current' value='current' />
-        <input type='submit' class='button' id='similar' value='similar' />
-        <div id='current_track'></div>
-        <div id='results'></div>
-        <div id='playlist'></div>
+<body>
+<?php if (!isset($_GET['token'])) { ?>
+    <input type='submit' class='button' id='login' value='login' />
+<?php } ?>
+    <input type='submit' class='button' id='go' value='go' />
+    <input type='submit' class='button' id='search' value='search' />
+    <input type='submit' class='button' id='current' value='current' />
+    <input type='submit' class='button' id='similar' value='similar' />
+    <div id='current_track'></div>
+    <div id='results'></div>
+    <div id='playlist'></div>
 
-        <script>
-            $(document).ready(function() {
-                const getUniqueID = () => {
-                    const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-                    return s4() + s4() + '-' + s4();
-                };
-                var id = null;
+    <script>
+        $(document).ready(function() {
+            const getUniqueID = () => {
+                const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+                return s4() + s4() + '-' + s4();
+            };
+            var id = null;
 
-                $(window).on('unload', function(e) {
-                    if (id) {
-                        $.post(window.location.href, 'action=bye&id=' + id);
-                    }
-                });
-
-                $('#go').click(function() {
-                    if (id) {
-                        $.post(window.location.href, 'action=bye&id=' + id);
-                    }
-                    id = getUniqueID();
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('POST', window.location.href, true);
-                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                    var done = 0;
-                    xhr.onprogress = function() {
-                        chunk = xhr.responseText.substring(done);
-                        $('#playlist').append(chunk);
-                        done = done + chunk.length;
-                    }
-                    xhr.send('action=go&id=' + id);
-                });
-
-                $('#search').click(function() {
-                    $.post(window.location.href, 'action=search',  function(data, status) {
-                        $('#results').html(data);
-                    });
-                });
-
-                $('#current').click(function() {
-                    $.post(window.location.href, 'action=current',  function(data, status) {
-                        $('#current_track').html(data);
-                    });
-                });
-
-                $('#similar').click(function() {
-                    $.post(window.location.href, 'action=similar&url=' + $('#current_track').html(),  function(data, status) {
-                        $('#results').html(data);
-                    });
-                });                
+            $(window).on('unload', function(e) {
+                if (id) {
+                    $.post(window.location.href, 'action=bye&id=' + id);
+                }
             });
-        </script>                        
-    </body>
+
+            $('#login').click(function() {
+                $.post(window.location.href, 'action=login', function(data, status) {
+                    window.location.href = data;
+                });
+            });
+
+            $('#go').click(function() {
+                if (id) {
+                    $.post(window.location.href, 'action=bye&id=' + id);
+                }
+                id = getUniqueID();
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', window.location.href, true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                var done = 0;
+                xhr.onprogress = function() {
+                    chunk = xhr.responseText.substring(done);
+                    $('#playlist').append(chunk);
+                    done = done + chunk.length;
+                }
+                xhr.send('action=go&id=' + id);
+            });
+
+            $('#search').click(function() {
+                $.post(window.location.href, 'action=search', function(data, status) {
+                    $('#results').html(data);
+                });
+            });
+
+            $('#current').click(function() {
+                $.post(window.location.href, 'action=current', function(data, status) {
+                    $('#current_track').html(data);
+                });
+            });
+
+            $('#similar').click(function() {
+                $.post(window.location.href, 'action=similar&url=' + $('#current_track').html(), function(data, status) {
+                    $('#results').html(data);
+                });
+            });                
+        });
+    </script>                        
+</body>
 </html>
 <?php
-        } elseif (isset($_POST['action'])) {
-            // do stuff
-            switch ($_POST['action']) {
-
-                case 'bye':
-                    if (isset($_POST['id'])) {
-                        unlink($ids_dir .'/' . $_POST['id']);
-                    }
-                    break;
-
-                case 'go':
-                    getPlaylist($_POST['id'], $session);
-                    break;
-
-                case 'search':
-                    searchTracks();
-                    break;
-
-                case 'current':    
-                    print $api->getMyCurrentTrack()->item->preview_url;
-                    break;
-
-                case 'similar':
-                    if (isset($_POST['url'])) {
-                        searchTracks($_POST['url']);
-                    }
-                    break;
-            }
-        }
 
     } else {
-        // get callback from spotify oauth
-        $options = [
-            'scope' => [
-                'playlist-modify-public',
-                'user-read-currently-playing',
-            ],
-        ];
+        // do stuff
+        switch ($_POST['action']) {
+            case 'bye':
+                if (isset($_POST['id'])) {
+                    unlink($ids_dir .'/' . $_POST['id']);
+                }
+                break;
 
-        header('Location: ' . $session->getAuthorizeUrl($options));
-        die();
+            case 'login':
+                // get callback from spotify oauth
+                $options = [
+                    'scope' => [
+                        'playlist-modify-public',
+                        'user-read-currently-playing',
+                    ],
+                ];
+                print $session->getAuthorizeUrl($options);
+                die();
+
+            case 'go':
+                getPlaylist($_POST['id'], $session);
+                break;
+
+            case 'search':
+                searchTracks();
+                break;
+
+            case 'current':    
+                print $api->getMyCurrentTrack()->item->preview_url;
+                break;
+
+            case 'similar':
+                if (isset($_POST['url'])) {
+                    searchTracks($_POST['url']);
+                }
+                break;
+        }
     }
 
     // garbage collection
