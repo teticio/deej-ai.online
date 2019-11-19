@@ -307,6 +307,12 @@
                 $('#playlist').append(chunk);
                 done = done + chunk.length;
             }
+            xhr.onreadystatechange = function() {
+                if (this.readyState == 4) {
+                    // reactivate button and remove spinner
+                    $('#generate').html('Go!').attr("disabled", false);
+                }
+            }
             tracks = [];
             $("#tracks option").each(function () {
                 tracks.push($(this).val());
@@ -321,10 +327,7 @@
                 'size': $('#size_input').val(),
                 'creativity': $('#creativity_slider').val(),
                 'noise': $('#noise_slider').val()
-            }), function () {
-                // reactivate button and remove spinner
-                $('#generate').html('Go!').attr('disabled', false);
-            });
+            }));
         }
     </script>
 
