@@ -1,0 +1,6 @@
+{
+    "require": {
+        "jwilsson/spotify-web-api-php": "^2.12",
+        "cboden/ratchet": "^0.4.1"
+    }
+}

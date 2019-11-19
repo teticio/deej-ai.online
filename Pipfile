@@ -1,0 +1,23 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+
+[packages]
+tensorflow = "==1.14.0"
+keras = "==2.2.4"
+spotipy = "*"
+flask = "*"
+librosa = "==0.7.0"
+pysoundfile = "*"
+dash = "*"
+dash-daq = "*"
+mutagen = "*"
+pillow = "*"
+pandas = "*"
+
+[requires]
+python_version = "3.6"
