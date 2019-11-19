@@ -38,7 +38,7 @@
         global $ids_dir;
 
         $postdata = [
-            'tracks' => $_POST['tracks'],
+            'tracks' => isset($_POST['tracks'])? $_POST['tracks'] : [],
             'replace' => $_POST['replace'],
             'size' => $_POST['size'],
             'creativity' => $_POST['creativity'],
@@ -47,7 +47,7 @@
 
         if (($token = $session->getAccessToken()) != '') {
             $postdata['access_token'] = $token;
-            $postdata['user_name'] = $api->me()['id'];
+            $postdata['username'] = $api->me()->id;
             $postdata['playlist'] = $_POST['playlist'];
         }
 
@@ -62,19 +62,21 @@
         $ch = curl_init($spotify_server);
         // stream results
         ob_implicit_flush(true);
-        ob_end_flush();
+        ob_end_flush(); 
 
         $callback = function ($ch, $str) {
-            $tracks = explode(' ', $str);
-            foreach ($tracks as $track) {
-                if ($track == '') { 
-                    continue;
+            if (!strstr($str, 'Error')) {
+                $tracks = explode(' ', $str);
+                foreach ($tracks as $track) {
+                    if ($track == '') { 
+                        continue;
+                    }
+                    if (substr($track, 0, 12) != 'playlist_id:') {
+                        print '<iframe src="https://open.spotify.com/embed/track/' . $track . '" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>';
+                    }
                 }
-                if (substr($track, 0, 12) != 'playlist_id:') {
-                    print '<iframe src="https://open.spotify.com/embed/track/' . $track . '" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>';
-                }
+                return strlen($str);
             }
-            return strlen($str);
         };
 
         curl_setopt_array($ch, [
@@ -215,7 +217,7 @@
             $('#size_input').on('change', function () {
                 this.value = Math.max(1, Math.min(this.value, 100));
             });
-            
+
             // Bootstrap tooltips
             $(document).ready(function () {
                 $('[data-toggle="tooltip"]').tooltip();
@@ -229,8 +231,8 @@
         }
 
         function searchTracks() {
-            $('#similar_to').attr("disabled", true).tooltip("hide")
-            $('#search_input').tooltip("hide")
+            $('#similar_to').attr('disabled', true).tooltip('hide')
+            $('#search_input').tooltip('hide')
             if (search_input.value == '') {
                 return;
             }
@@ -239,7 +241,7 @@
                 'search_string': $('#search_input').val()
             }), function (data, status) {
                 // reactivate button and remove spinner
-                $('#similar_to').html('Similar').attr("disabled", false);
+                $('#similar_to').html('Similar').attr('disabled', false);
                 results = JSON.parse(data);
                 $('#search_results').empty();
                 results.forEach(function (item) {
@@ -287,7 +289,7 @@
 
         function generatePlaylist() {
              // disable button and add spinner
-            $('#generate').html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Go!').attr("disabled", true).tooltip("hide");
+            $('#generate').html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Go!').attr('disabled', true).tooltip('hide');
             if (id) {
                 $.post(window.location.href, 'action=bye&id=' + id);
             }
@@ -312,11 +314,14 @@
                 'id': id,
                 'playlist': $('#playlist_input').val(),
                 'tracks': tracks,
-                'replace': $('#replace').is(':checked')? '1': '0',
+                'replace': $('#replace_input').is(':checked')? '1': '0',
                 'size': $('#size_input').val(),
                 'creativity': $('#creativity_slider').val(),
                 'noise': $('#noise_slider').val()
-            }));
+            }), function () {
+                // reactivate button and remove spinner
+                $('#generate').html('Go!').attr('disabled', false);
+            });
         }
     </script>
 
