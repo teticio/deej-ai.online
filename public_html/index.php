@@ -3,6 +3,7 @@
     // similar
     // demo
     // handle errors
+    // bandcamp
     // check origin of request coming from deej-ai.online
     // log
     // rotate screen in app?
@@ -71,7 +72,9 @@
                     if ($track == '') { 
                         continue;
                     }
-                    if (substr($track, 0, 12) != 'playlist_id:') {
+                    if (substr($track, 0, 12) == 'playlist_id:') {
+                        print '<div class="row justify-content-center"><a href="spotify:playlist:' . substr($track, 12) . '"><img src="spotify.png" height="32px"></img></a>&nbsp;&nbsp;<h3><a href="https://open.spotify.com/playlist/' . substr($track, 12) . '" target="_blank">' . $_POST['playlist'] . '</a></h3></div>';
+                    } else {
                         print '<iframe src="https://open.spotify.com/embed/track/' . $track . '" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>';
                     }
                 }
@@ -298,7 +301,7 @@
             xhr.open('POST', window.location.href, true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             var done = 0;
-            $('#playlist').html();
+            $('#playlist').empty();
             xhr.onprogress = function () {
                 chunk = xhr.responseText.substring(done);
                 $('#playlist').append(chunk);
