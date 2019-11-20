@@ -149,7 +149,11 @@
 
     if (isset($_GET['token'])) {
         // get access token from refresh token
-        $session->refreshAccessToken($_GET['token']);
+        try {
+            $session->refreshAccessToken($_GET['token']);
+        } catch (Exception $e) {
+            $_GET['token'] = null;
+        }
     }
 
     if (!isset($_POST['action'])) {
@@ -241,7 +245,7 @@
                         $('#current_spotify_track').empty();
                     }                    
                 });
-            }, 500);
+            }, 1000);
 <?php } ?>
 
             // Bootstrap tooltips
@@ -326,6 +330,7 @@
 
         function generatePlaylist() {
              // disable button and add spinner
+            $('#generate').attr("disabled", true).tooltip("hide");
             $('#go_wait').show();
             if (id) {
                 $.post(window.location.href, 'action=bye&id=' + id);
