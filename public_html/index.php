@@ -1,11 +1,8 @@
 <?php
-    // check funnhy playlist names ok
-    // similar
     // demo
     // handle errors
     // bandcamp
     // check origin of request coming from deej-ai.online
-    // log
     // rotate screen in app?
     // cookies
     // 404
@@ -114,7 +111,7 @@
         if (!isset($_POST['url'])) {
             // search for string
             $postdata = [
-                'search_string' => $_POST['search_string']
+                'search_string' => $_POST['string']
             ];
         } else {
             // search for similar sounding tracks
@@ -194,13 +191,13 @@
         integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
         crossorigin="anonymous"></script>
 
-    <!--on document ready-->
     <script>
         const getUniqueID = () => {
             const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
             return s4() + s4() + '-' + s4();
         };
         var id = null;
+        var preview_url = null;
 
         $(document).ready(function () {
             $(window).on('unload', function () {
@@ -229,6 +226,24 @@
                 this.value = Math.max(1, Math.min(this.value, 100));
             });
 
+<?php if (isset($_GET['token'])) { ?>
+            setInterval(function() {
+                $.post(window.location.href, 'action=current', function (data, status) {
+                    results = JSON.parse(data);
+                    preview_url = results[0]
+                    if (preview_url) {
+                        $('#similar').show();
+                        $('#similar2').show();
+                        $('#current_spotify_track').html(results[1] + ' - ' + results[2]);
+                    } else {
+                        $('#similar').hide();
+                        $('#similar2').hide();
+                        $('#current_spotify_track').empty();
+                    }                    
+                });
+            }, 500);
+<?php } ?>
+
             // Bootstrap tooltips
             $(document).ready(function () {
                 $('[data-toggle="tooltip"]').tooltip();
@@ -241,20 +256,31 @@
             });
         }
 
-        function searchTracks() {
-            $('#similar_to').attr('disabled', true).tooltip('hide')
-            $('#search_input').tooltip('hide')
-            if (search_input.value == '') {
-                return;
+        function searchTracks(url = null) {
+            $('#search_input').tooltip('hide');
+            if (url) {
+                // find similar sounding tracks to one currently playing
+                $('#similar_to').attr('disabled', true).tooltip('hide');
+                $('#similar_wait').show();
+                body = jQuery.param({
+                    'action': 'search',
+                    'url': url
+                });
+            } else {
+                // find tracks by name
+                if ($('#search_input').val() == '') {
+                    return;
+                }
+                body = jQuery.param({
+                    'action': 'search',
+                    'string':  $('#search_input').val()
+                });
             }
-            $.post(window.location.href, jQuery.param({
-                'action': 'search',
-                'search_string': $('#search_input').val()
-            }), function (data, status) {
-                // reactivate button and remove spinner
-                $('#similar_to').html('Similar').attr('disabled', false);
+            $.post(window.location.href, body, function (data, status) {
+                $('#similar_wait').hide();
+                $('#similar_to').attr('disabled', false);
                 results = JSON.parse(data);
-                $('#search_results').empty();
+                $('#search_results').find('option').not(':first').remove();
                 results.forEach(function (item) {
                     $('#search_results').append(new Option(item['track'], item['id']));
                 })
@@ -300,7 +326,7 @@
 
         function generatePlaylist() {
              // disable button and add spinner
-            $('#generate').html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Go!').attr('disabled', true).tooltip('hide');
+            $('#go_wait').show();
             if (id) {
                 $.post(window.location.href, 'action=bye&id=' + id);
             }
@@ -317,12 +343,12 @@
             }
             xhr.onreadystatechange = function() {
                 if (this.readyState == 4) {
-                    // reactivate button and remove spinner
-                    $('#generate').html('Go!').attr("disabled", false);
+                    $('#go_wait').hide();
+                    $('#generate').attr('disabled', false);
                 }
             }
             tracks = [];
-            $("#tracks option").each(function () {
+            $('#tracks option').each(function () {
                 tracks.push($(this).val());
             });
             tracks.shift();
@@ -337,10 +363,37 @@
                 'noise': $('#noise_slider').val()
             }));
         }
+
+        function fromMozartToMotorhead() {
+            $('#search_input').val('motörhead');
+            searchTracks();
+            $('#search_results eq:0').prop('selected', true);
+            $('#tracks').find('option').not(':first').remove();
+            tracks = [{
+                id: "2mRUmSG3XGjFloqgAT2UJN",
+                name: "Wolfgang Amadeus Mozart - Eine kleine Nachtmusik K. 525: Allegro"
+            }, {
+                id: "1T45V6RDj1vTLFY6Cw4tNf",
+                name: "Motörhead - Ace of Spades"
+            }];
+            tracks.forEach(function (track) {
+                $('#tracks').append(new Option(track['name'], track['id']));
+            })
+            $('#tracks eq:0').prop('selected', true);
+            updateAddDropdownText();
+            $('#creativity_slider').val(1);
+            $('#creativity').html(1);
+            $('#creativity_slider').attr('disabled', false);
+            $('#noise_slider').val(0);
+            $('#noise').html(0);
+            $('#noise_slider').attr('disabled', true);
+            $('#size_input').val(10);
+            generatePlaylist();
+        }
     </script>
 
-    <!--Banner style-->
     <style>
+        /* Banner style */
         .banner {
             background-image: url("records.jpg");
             background-size: cover;
@@ -348,10 +401,8 @@
             background-attachment: fixed;
             background-position: center center;
         }
-    </style>
 
-    <!--Link style-->
-    <style>
+        /* Link style */
         a,
         a:hover,
         a:focus,
@@ -359,10 +410,8 @@
         a:visited {
             color: #1ed761;
         }
-    </style>
 
-    <!--Footer style-->
-    <style>
+        /* Footer style */
         .footer {
             position: fixed;
             left: 0;
@@ -371,10 +420,8 @@
             text-align: center;
             opacity: 0.7
         }
-    </style>
 
-    <!--Social media button style-->
-    <style>
+        /* Social media button style */
         .fa {
             padding: 5px;
             font-size: 25px;
@@ -443,21 +490,21 @@
         <div class="form-group">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <input type="text" class="form-control" placeholder="Search..." onchange="searchTracks()" size="10"
+                    <input type="text" class="form-control" placeholder="Search..." onchange="searchTracks();" size="10"
                         id="search_input" data-toggle="tooltip" title="Search the database of more than 320,000 tracks">
                 </div>
                 <div class="col-md-6">
                     <div class="row align-items-center">
-<?php if (isset($_GET['token'])) { ?>
-                        <div class="col-auto" id="similar">
-                            <button class="btn btn-primary" type="button" onclick="getSimilar()" id="similar_to"
+                        <div class="col-auto" id="similar" style = "display: none;">
+                            <button class="btn btn-primary" type="button" onclick="searchTracks(preview_url);" id="similar_to"
                                 data-toggle="tooltip"
-                                title="Find similar sounding tracks to one currently playing on Spotify.">Similar</button>
+                                title="Find similar sounding tracks to one currently playing on Spotify.">
+                                <span class="spinner-border spinner-border-sm mr-2" style="display: none;" id="similar_wait"></span>
+                                Similar</button>
                         </div>
-                        <div class="col-auto" id="similar2">
+                        <div class="col-auto" id="similar2" style = "display: none;">
                             <h5><span id="current_spotify_track"></span></h5>
                         </div>
-<?php } ?>
                     </div>
                 </div>
             </div>
@@ -465,14 +512,14 @@
             <div class="row align-items-center">
                 <div class="col-sm-6">
                     <label for="search_results"><span id="num_found">Search results</span></label>
-                    <select class="form-control" size="4" style="overflow-x: scroll" oninput="addTracks()"
+                    <select class="form-control" size="4" style="overflow-x: scroll" oninput="addTracks();"
                         id="search_results">
                         <option value="" disabled selected></option>
                     </select>
                 </div>
                 <div class="col-sm-6">
                     <label for="tracks">Added <span id="num_added">tracks</span></label>
-                    <select class="form-control" size="4" style="overflow-x: scroll" oninput="removeTracks()"
+                    <select class="form-control" size="4" style="overflow-x: scroll" oninput="removeTracks();"
                         id="tracks">
                         <option value="" disabled selected></option>
                     </select>
@@ -482,9 +529,11 @@
                 <div class="col-md-1">
                     <div class="text-center">
                         <br>
-                        <button class="btn btn-primary" type="button" onclick="generatePlaylist()" id="generate"
+                        <button class="btn btn-primary" type="button" onclick="generatePlaylist();" id="generate"
                             data-toggle="tooltip"
-                            title="If two or more tracks are selected, a playlist will be generated that joins the dots between them. If no tracks are selected, a playlist based on a random track will be generated.">Go!</button>
+                            title="If two or more tracks are selected, a playlist will be generated that joins the dots between them. If no tracks are selected, a playlist based on a random track will be generated.">
+                            <span class="spinner-border spinner-border-sm mr-2" style="display: none;" id="go_wait"></span>
+                            Go!</button>
                     </div>
                 </div>
                 <div class="col-md-5">
@@ -609,8 +658,12 @@
                 searchTracks();
                 break;
 
-            case 'current':    
-                print $api->getMyCurrentTrack()->item->preview_url;
+            case 'current':
+                print json_encode([
+                    $api->getMyCurrentTrack()->item->preview_url,
+                    $api->getMyCurrentTrack()->item->artists[0]->name,
+                    $api->getMyCurrentTrack()->item->name
+                ]);
                 break;
         }
     }
