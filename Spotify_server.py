@@ -1,30 +1,35 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = ''
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+import warnings
+warnings.simplefilter("ignore")
+
+import logging
+logging.basicConfig(level=logging.INFO)
+
+import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
+import re
+import sys
+import json
+import pickle
+import random
+import shutil
+import requests
+import librosa
+from io import BytesIO
+import numpy as np
+from keras.models import load_model
+import spotipy
+import spotipy.util as util
 from flask import Flask, Response
 from flask import request
 from flask import jsonify
 from flask import has_request_context, request
-import logging
-import os
 
 app = Flask(__name__)
-
-logging.basicConfig(level=logging.ERROR)
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-os.environ["CUDA_VISIBLE_DEVICES"] = ''
-
-import re
-import numpy as np
-import pickle
-import argparse
-import spotipy
-import spotipy.util as util
-import random
-import requests
-import json
-from io import BytesIO
-import shutil
-import tensorflow as tf
-from keras.models import load_model
-import librosa
 
 epsilon_distance = 0.001
 lookback = 3
@@ -66,11 +71,10 @@ def add_track_to_playlist(sp, username, playlist_id, track_id, replace=False):
     if sp is not None and username is not None and playlist_id is not None:
         try:
             if replace:
-                result = sp.user_playlist_replace_tracks(
-                    username, playlist_id, [track_id])
+                sp.user_playlist_replace_tracks(username, playlist_id,
+                                                [track_id])
             else:
-                result = sp.user_playlist_add_tracks(username, playlist_id,
-                                                     [track_id])
+                sp.user_playlist_add_tracks(username, playlist_id, [track_id])
         except spotipy.client.SpotifyException:
             pass
 
@@ -154,7 +158,8 @@ def join_the_dots(client_id, sp, username, playlist_id, mp3tovecs, weights, ids,
                 if track_id not in playlist + ids and tracks[
                         track_id] not in playlist_tracks and tracks[
                             track_id][:tracks[track_id].find(' - ')] != tracks[
-                                playlist[-1]][:tracks[playlist[-1]].find(' - ')]:
+                                playlist[-1]][:tracks[playlist[-1]].find(' - '
+                                                                         )]:
                     break
             playlist.append(track_id)
             playlist_tracks.append(tracks[track_id])
@@ -221,7 +226,6 @@ def get_similar(client_id, track_url, model, graph, mp3tovec, track_ids):
     hop_length = 512
     n_mels = model.layers[0].input_shape[1]
     slice_size = model.layers[0].input_shape[2]
-    slice_time = slice_size * hop_length / sr
 
     try:
         r = requests.get(track_url, allow_redirects=True)
@@ -292,7 +296,7 @@ def post():
         ],
                      key=lambda x: tracks[x])[:max_results]
         response = []
-        for i, id in enumerate(ids):
+        for id in ids:
             response.append({'track': tracks[id], 'id': id})
         return jsonify(response)
 
@@ -302,7 +306,7 @@ def post():
         ids = get_similar(client_id, track_url, model, graph, mp3tovecs,
                           track_ids)[:10]
         response = []
-        for i, id in enumerate(ids):
+        for id in ids:
             response.append({'track': tracks[id], 'id': id})
         return jsonify(response)
 
@@ -411,4 +415,5 @@ if __name__ == '__main__':
     model._make_predict_function()
     graph = tf.compat.v1.get_default_graph()
 
-    app.run(debug=False, port=5123)
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 5050
+    app.run(debug=False, port=port)

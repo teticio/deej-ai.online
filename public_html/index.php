@@ -1,5 +1,6 @@
 <?php
-    // playlist name and link
+    // ping and port
+    // check funnhy playlist names ok
     // similar
     // demo
     // handle errors
@@ -25,8 +26,16 @@
         'auto_refresh' => true,
     ]);
 
-    // spotify server url
-    $spotify_server = 'http://localhost:5123/spotify_server';
+    // make sure spotify server is running
+    $port = 5123;
+    $spotify_server = 'http://localhost:' . $port . '/spotify_server';
+    $connection = @fsockopen('localhost', $port);
+    if (is_resource($connection)) {
+        fclose($connection);
+    } else {
+        $output = exec('(cd ..; ./start_server ' . $port . ' > /dev/null 2> /dev/null &)');
+        sleep(10);
+    }
 
     // directory to store active ids
     $ids_dir = '../ids';
