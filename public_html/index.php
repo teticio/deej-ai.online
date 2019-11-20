@@ -1,5 +1,4 @@
 <?php
-    // ping and port
     // check funnhy playlist names ok
     // similar
     // demo
@@ -62,10 +61,10 @@
         }
 
         // create file that gets deleted if user goes away
-        if (isset($client_id)) {
-            $file = fopen($ids_dir .'/' . $client_id, 'w');
+        if (isset($_POST['id'])) {
+            $file = fopen($ids_dir .'/' . $_POST['id'], 'w');
             fclose($file);
-            $postdata['client_id'] = $client_id;
+            $postdata['client_id'] = $_POST['id'];
         }
         $payload = json_encode($postdata); 
 
