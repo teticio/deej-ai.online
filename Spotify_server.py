@@ -5,9 +5,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import warnings
 warnings.simplefilter("ignore")
 
-import logging
-logging.basicConfig(level=logging.INFO)
-
 import tensorflow as tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
@@ -28,8 +25,10 @@ from flask import Flask, Response
 from flask import request
 from flask import jsonify
 from flask import has_request_context, request
+import logging
 
 app = Flask(__name__)
+app.logger.setLevel(logging.INFO)
 
 epsilon_distance = 0.001
 lookback = 3
@@ -285,6 +284,7 @@ def after_request(response):
 @app.route('/spotify_server', methods=['POST'])
 def post():
     content = request.get_json()
+    app.logger.info(content)
 
     if 'search_string' in content:
         search_string = re.sub(r'([^\s\w]|_)+', '',
