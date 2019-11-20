@@ -1,13 +1,8 @@
 <?php
-    // demo
-    // handle errors
-    // bandcamp
-    // check origin of request coming from deej-ai.online
+    // bandcamp-radio
     // rotate screen in app?
     // cookies
-    // 404
-    // https
-
+    
     require '../vendor/autoload.php';
 
     $session = new SpotifyWebAPI\Session(
@@ -629,7 +624,6 @@
             </div>
         </div>
     </div>
-    <script>
 </body>
 
 </html>
