@@ -1,4 +1,4 @@
 #!/bin/bash
 . activate
-python Spotify_server.py $1 2>&1 >> server.log
+python Spotify_server.py $1 &>> server.log
 
