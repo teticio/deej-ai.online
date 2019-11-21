@@ -1,5 +1,6 @@
 .vscode
-ids
+spotify_ids
+bandcamp_ids
 vendor
 speccy_model
 spotify_tracks.p
@@ -8,3 +9,4 @@ tracktovec.p
 server.log
 urltovec.p
 bandcamp_tracks.p
+*.pyc

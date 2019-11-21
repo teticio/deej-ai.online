@@ -15,9 +15,7 @@
 
     $api = new SpotifyWebAPI\SpotifyWebAPI();
     $api->setSession($session);
-    $api->setOptions([
-        'auto_refresh' => true,
-    ]);
+    $api->setOptions(['auto_refresh' => true]);
 
     // make sure spotify server is running
     $port = 5123;
@@ -29,15 +27,14 @@
         $output = exec('(cd ..; ./start_spotify_server ' . $port . ' > /dev/null 2> /dev/null &)');
         sleep(10);
     }
-
-    // directory to store active ids
-    $ids_dir = '../ids';
-
     $curlopts = [
         CURLOPT_RETURNTRANSFER => true,
         CURLINFO_HEADER_OUT => true,
         CURLOPT_POST => true
     ];
+
+    // directory to store active ids
+    $ids_dir = '../spotify_ids';
 
     // get playlist from spotify server
     function getPlaylist() {
@@ -278,7 +275,7 @@
                         $('#current_spotify_track').empty();
                     }                    
                 });
-            }, 1000);
+            }, 5000);
 <?php } ?>
 
             // Bootstrap tooltips
@@ -569,7 +566,9 @@
                         <br>
                         <button class="btn btn-primary" type="button" onclick="generatePlaylist();" id="generate"
                             data-toggle="tooltip"
-                            title="If two or more tracks are selected, a playlist will be generated that joins the dots between them. If no tracks are selected, a playlist based on a random track will be generated.">
+                            title="If two or more tracks are selected, a playlist will be generated that joins the 
+                            dots between them. If no tracks are selected, a playlist based on a random track will 
+                            be generated.">
                             <span class="spinner-border spinner-border-sm mr-2" style="display: none;" id="go_wait"></span>
                             Go!</button>
                     </div>
@@ -582,7 +581,10 @@
                     </div>
                     <input type="range" class="custom-range" min="0" max="1" step="0.01" value="0.5"
                         id="creativity_slider" data-toggle="tooltip"
-                        title="A value of 0 will select tracks based on how likely they are to appear in a user's playlist. A value of 1 will select tracks based purely on how they sound. For very popular tracks, a higher number is recommended while for less distinctive music, it is better to choose a lower number.">
+                        title="A value of 0 will select tracks based on how likely they are to appear in a user's 
+                        playlist. A value of 1 will select tracks based purely on how they sound. For very popular 
+                        tracks, a higher number is recommended while for less distinctive music, it is better to 
+                        choose a lower number.">
                 </div>
                 <div class="col-md-5">
                     <div class="custom-control custom-checkbox">

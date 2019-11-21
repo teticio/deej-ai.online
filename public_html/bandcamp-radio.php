@@ -9,16 +9,15 @@
         $output = exec('(cd ..; ./start_bandcamp_server ' . $port . ' > /dev/null 2> /dev/null &)');
         sleep(10);
     }
-
-    // directory to store active ids
-    $ids_dir = '../ids';
-
     $curlopts = [
         CURLOPT_RETURNTRANSFER => true,
         CURLINFO_HEADER_OUT => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => $payload,
     ];
+
+    // directory to store active ids
+    $ids_dir = '../bandcamp_ids';
 
     // remove old playlists on bandcamp server
     function removePlaylists($id) {
