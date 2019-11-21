@@ -1,10 +1,4 @@
 <?php
-    // TODO:
-    // refactor common functions into utils
-    // upload urltovec.p and bandcamp_tracks.p to drive, download automatically
-    // rotate screen in app?
-    // cookies
-    
     require '../vendor/autoload.php';
 
     $session = new SpotifyWebAPI\Session(

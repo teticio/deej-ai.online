@@ -10,3 +10,4 @@ server.log
 urltovec.p
 bandcamp_tracks.p
 *.pyc
+.ipynb_checkpoints
