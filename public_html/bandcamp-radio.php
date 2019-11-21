@@ -1,6 +1,4 @@
 <?php
-    // upload urltovec.p and bandcamp_tracks.p to drive, download automatically
-
     // make sure bandcamp server is running
     $port = 5124;
     $bandcamp_server = 'http://localhost:' . $port . '/bandcamp_server';
