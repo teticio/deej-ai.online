@@ -269,13 +269,13 @@
         }
 
         function spotifyToBandcamp() {
+            playing = !$('#mp3')[0].paused
             $('#status').html('Analyzing');
             $('#num_tracks').show();
             spotify_url = $('#search_results :selected').val();
             if (spotify_url == '') {
                 return;
             }
-            playing = !$('#mp3')[0].paused;
             newPlaylist(function (track_info) {
                 if (playing) {
                     $('#mp3')[0].play();
@@ -286,7 +286,7 @@
         }
 
         function nextTrack(play = false) {
-            playing = !$('#mp3')[0].paused;
+            playing = !$('#mp3')[0].paused
             $('#next').css('textShadow', 'none');
             getNextTrack(playlist_id, function (track_info) {
                 setTrack(track_info);
@@ -298,11 +298,11 @@
         }
 
         function ejectTrack() {
-            playing = !$('#mp3').paused;
+            playing = !$('#mp3')[0].paused
             $('#eject').css('textShadow', 'none');
             newPlaylist(function (track_info) {
                 if (playing) {
-                    $('#mp3').play();
+                    $('#mp3')[0].play();
                 }
                 $('#eject').css('textShadow', '-5px 5px 8px #111');
             });
