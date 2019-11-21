@@ -50,8 +50,6 @@ def add_track_to_playlist(sp, username, playlist_id, track_id, replace=False):
             pass
 
 
-
-
 # create a musical journey between given track "waypoints"
 def join_the_dots(client_id, sp, username, playlist_id, mp3tovecs, weights, ids, \
                   tracks, track_ids, n=5, noise=0, replace=True):
@@ -69,7 +67,8 @@ def join_the_dots(client_id, sp, username, playlist_id, mp3tovecs, weights, ids,
         app.logger.info(f'{len(playlist)}.* {tracks[playlist[-1]]}')
         yield playlist[-1] + ' '
         for i in range(n):
-            if (client_id and not os.path.exists('./spotify_ids/' + client_id)):
+            if (client_id
+                    and not os.path.exists('./spotify_ids/' + client_id)):
                 # the user has gone away
                 break
             candidates = most_similar_by_vec(mp3tovecs,
@@ -180,7 +179,10 @@ def post():
         if vecs is not None:
             # vector seed
             candidates = most_similar_by_vec([mp3tovecs], [1], [vecs])
-            ids = [track_ids[int(candidate[0][0])] for candidate in candidates[0:10]]
+            ids = [
+                track_ids[int(candidate[0][0])]
+                for candidate in candidates[0:10]
+            ]
             response = [{'track': tracks[id], 'id': id} for id in ids]
             return jsonify(response)
         return ''
