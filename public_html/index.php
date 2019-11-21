@@ -24,46 +24,48 @@
     if (is_resource($connection)) {
         fclose($connection);
     } else {
-        $output = exec('(cd ..; ./start_server ' . $port . ' > /dev/null 2> /dev/null &)');
+        $output = exec('(cd ..; ./start_spotify_server ' . $port . ' > /dev/null 2> /dev/null &)');
         sleep(10);
     }
 
     // directory to store active ids
     $ids_dir = '../ids';
 
+    $curlopts = [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLINFO_HEADER_OUT => true,
+        CURLOPT_POST => true
+    ];
+
     // get playlist from spotify server
     function getPlaylist() {
+        global $curlopts;
         global $api;
         global $session;
         global $spotify_server;
         global $ids_dir;
 
+        // create file that gets deleted if user goes away
+        $file = fopen($ids_dir .'/' . $_POST['id'], 'w');
+        fclose($file);
         $postdata = [
+            'client_id' => $_POST['id'],
             'tracks' => isset($_POST['tracks'])? $_POST['tracks'] : [],
             'replace' => $_POST['replace'],
             'size' => $_POST['size'],
             'creativity' => $_POST['creativity'],
             'noise' => $_POST['noise']
         ];
-
         if (($token = $session->getAccessToken()) != '') {
             $postdata['access_token'] = $token;
             $postdata['username'] = $api->me()->id;
             $postdata['playlist'] = $_POST['playlist'];
         }
-
-        // create file that gets deleted if user goes away
-        if (isset($_POST['id'])) {
-            $file = fopen($ids_dir .'/' . $_POST['id'], 'w');
-            fclose($file);
-            $postdata['client_id'] = $_POST['id'];
-        }
         $payload = json_encode($postdata); 
-
         $ch = curl_init($spotify_server);
         // stream results
         ob_implicit_flush(true);
-        ob_end_flush(); 
+        ob_end_flush();
 
         $callback = function ($ch, $str) {
             if (!strstr($str, 'Error')) {
@@ -82,24 +84,20 @@
             }
         };
 
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLINFO_HEADER_OUT => true,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $payload,
-            CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($payload)
-            ],
-            CURLOPT_WRITEFUNCTION => $callback
+        curl_setopt_array($ch, $curlopts);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($payload)
         ]);
-    
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, $callback);
         curl_exec($ch);
         curl_close($ch);
     }
 
     // get search results from spotify server
     function searchTracks() {
+        global $curlopts;
         global $spotify_server;
         global $ids_dir;
 
@@ -115,28 +113,22 @@
             ];
         }
         $payload = json_encode($postdata); 
-
         $ch = curl_init($spotify_server);
-
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLINFO_HEADER_OUT => true,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $payload,
-            CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($payload)
-            ]
+        curl_setopt_array($ch, $curlopts);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($payload)
         ]);
-    
-        print curl_exec($ch);
+        $result = curl_exec($ch);
+        print $result;
         curl_close($ch);
     }
 
     if (isset($_GET['code'])) {
         // get refresh token from callback url code
         $session->requestAccessToken($_GET['code']);
-        header('Location: http://' . $_SERVER['SERVER_NAME'] . '?' . http_build_query([
+        header('Location: https://' . $_SERVER['SERVER_NAME'] . '?' . http_build_query([
             'token' => $session->getRefreshToken()
         ]));
         die();
@@ -151,7 +143,51 @@
         }
     }
 
-    if (!isset($_POST['action'])) {
+    // garbage collection
+    $dir = new DirectoryIterator($ids_dir);
+    foreach ($dir as $fileinfo) {
+        if (!$fileinfo->isDot() && filemtime($fileinfo->getPathname()) - time() > strtotime('1 day', 0)) {
+            unlink($fileinfo->getPathname());
+        }
+    }
+
+    if (isset($_POST['action'])) {
+        // do stuff
+        switch ($_POST['action']) {
+            case 'bye':
+                if (file_exists($file = $ids_dir .'/' . $_POST['id'])) {
+                    unlink($file);
+                }
+                break;
+
+            case 'login':
+                // get callback from spotify oauth
+                $options = [
+                    'scope' => [
+                        'playlist-modify-public',
+                        'user-read-currently-playing',
+                    ],
+                ];
+                print $session->getAuthorizeUrl($options);
+                die();
+
+            case 'go':
+                getPlaylist();
+                break;
+
+            case 'search':
+                searchTracks();
+                break;
+
+            case 'current':
+                print json_encode([
+                    $api->getMyCurrentTrack()->item->preview_url,
+                    $api->getMyCurrentTrack()->item->artists[0]->name,
+                    $api->getMyCurrentTrack()->item->name
+                ]);
+                break;
+        }
+    } else {
         // load page
 
 ?>
@@ -282,7 +318,7 @@
                 $('#search_results').find('option').not(':first').remove();
                 results.forEach(function (item) {
                     $('#search_results').append(new Option(item['track'], item['id']));
-                })
+                });
                 $('#search_results option:eq(0)').text((results.length > 0)? 'Select to add to playlist' : '');
                 if (results.length == 1) {
                     $('#num_found').html('1 search result');
@@ -575,7 +611,7 @@
                         target="_blank">MBIT School</a>. If you want to learn about it works, check out this <a
                         href="https://towardsdatascience.com/create-automatic-playlists-by-using-deep-learning-to-listen-to-the-music-b72836c24ce2"
                         target="_blank">article</a>.</h5>
-                <h5><span style="color: red;">*NEW* </span><a href="bandcamp-radio.html" target="_blank">Bandcamp
+                <h5><span style="color: red;">*NEW* </span><a href="bandcamp-radio.php" target="_blank">Bandcamp
                         radio</a> creates playlists on the fly based on a random Bandcamp track or a Spotify track of
                     your choosing. Keep checking back as I am constantly adding new tracks to the database.</h5>
                 <div class="row align-items-center">
@@ -628,50 +664,5 @@
 
 </html>
 <?php
-
-    } else {
-        // do stuff
-        switch ($_POST['action']) {
-            case 'bye':
-                if (file_exists($file = $ids_dir .'/' . $_POST['id'])) {
-                    unlink($file);
-                }
-                break;
-
-            case 'login':
-                // get callback from spotify oauth
-                $options = [
-                    'scope' => [
-                        'playlist-modify-public',
-                        'user-read-currently-playing',
-                    ],
-                ];
-                print $session->getAuthorizeUrl($options);
-                die();
-
-            case 'go':
-                getPlaylist();
-                break;
-
-            case 'search':
-                searchTracks();
-                break;
-
-            case 'current':
-                print json_encode([
-                    $api->getMyCurrentTrack()->item->preview_url,
-                    $api->getMyCurrentTrack()->item->artists[0]->name,
-                    $api->getMyCurrentTrack()->item->name
-                ]);
-                break;
-        }
-    }
-
-    // garbage collection
-    $dir = new DirectoryIterator($ids_dir);
-    foreach ($dir as $fileinfo) {
-        if (!$fileinfo->isDot() && filemtime($ids_dir .'/' . $fileinfo->getFilename()) - time() > strtotime('1 day', 0)) {
-            unlink($ids_dir .'/' . $_POST['id']);
-        }
     }
 ?>
