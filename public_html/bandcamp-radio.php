@@ -239,22 +239,27 @@
             }
         }
 
-        function setTrack() {
+        function setTrack(play = false) {
             if  (track_info[0].substring(0, 8) != '!DOCTYPE') {
-                $('#track').attr('href', track_info[2]);
-                $('#track').html(track_info[5]);
-                $('#artist').attr('href', track_info[2].substring(0, track_info[2].search('bandcamp.com')) + 'bandcamp.com');
-                $('#artist').html(track_info[3]);
-                $('#mp3').attr('src', track_info[0]);
+                $('#album-art').on('load', function () {
+                    $('#mp3').attr('src', track_info[0]);
+                    if (play) {
+                        $('#mp3')[0].play();
+                    }
+                    $('#player').css('visibility',  'visible');
+                    $('#track').attr('href', track_info[2]);
+                    $('#track').html(track_info[5]);
+                    $('#artist').attr('href', track_info[2].substring(0, track_info[2].search('bandcamp.com')) + 'bandcamp.com');
+                    $('#artist').html(track_info[3]);
+                    $('#album-link').attr('href', track_info[2]);
+                });
                 $('#album-art').attr('src', track_info[1]);
-                $('#album-link').attr('href', track_info[2]);
-                $('#player').css('visibility',  'visible');
             } else {
                 nextTrack();
             }
         }
 
-        function newPlaylist(cb = null, url = null) {
+        function newPlaylist(play = false, cb = null, url = null) {
             if (url) {
                 body = jQuery.param({
                     'action' : 'playlist',
@@ -271,7 +276,7 @@
                 playlist_id = data;
                 try { window.localStorage.playlist_id = playlist_id; } catch {}
                 getNextTrack(playlist_id, function () {
-                    setTrack();
+                    setTrack(play);
                     if (cb) {
                         cb();
                     }
@@ -287,10 +292,7 @@
             if (spotify_url == '') {
                 return;
             }
-            newPlaylist(function () {
-                if (playing) {
-                    $('#mp3')[0].play();
-                }
+            newPlaylist(playing, function () {
                 $('#num_tracks').hide();
                 $('#status').html('&nbsp;');
             }, spotify_url)
@@ -300,10 +302,7 @@
             playing = !$('#mp3')[0].paused
             $('#next').css('textShadow', 'none');
             getNextTrack(playlist_id, function () {
-                setTrack();
-                if (play || playing) {
-                    $('#mp3')[0].play();
-                }
+                setTrack(play || playing);
                 $('#next').css('textShadow', '-5px 5px 8px #111');
             });
         }
@@ -311,10 +310,7 @@
         function ejectTrack() {
             playing = !$('#mp3')[0].paused
             $('#eject').css('textShadow', 'none');
-            newPlaylist(function () {
-                if (playing) {
-                    $('#mp3')[0].play();
-                }
+            newPlaylist(playing, function () {
                 $('#eject').css('textShadow', '-5px 5px 8px #111');
             });
         }    
