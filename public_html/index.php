@@ -271,7 +271,6 @@
                 });
             }, 5000);
 <?php } ?>
-
             // Bootstrap tooltips
             $(document).ready(function () {
                 $('[data-toggle="tooltip"]').tooltip();

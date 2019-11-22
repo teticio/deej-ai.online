@@ -101,7 +101,7 @@
         global $ids_dir;
 
         // create file that gets deleted if user goes away
-        $file = fopen($ids_dir .'/' . $_POST['id'], 'w');
+        $file = fopen(c .'/' . $_POST['id'], 'w');
         fclose($file);
         if (isset($_POST['url'])) {
             $postdata = [
@@ -190,17 +190,27 @@
             return s4() + s4() + '-' + s4();
         };
         var id = null;
+        var track_info = null;
         var playlist_id = null;
 
         $(document).ready(function () {
-            $(window).on('unload', function () {
-                if (id) {
-                    $.post(window.location.href, 'action=bye&id=' + id);
-                }
-            });
-
-            id = getUniqueID();
-            newPlaylist();
+            if (window.localStorage.id) {
+                id = window.localStorage.id;
+            } else {
+                id = getUniqueID();
+                window.localStorage.id = id;
+            }
+            try {
+                track_info = JSON.parse(window.localStorage.track_info);
+            } catch {
+                track_info = null;
+            }
+            if (window.localStorage.playlist_id && track_info) {
+                playlist_id = window.localStorage.playlist_id;
+                setTrack();
+            } else {
+                newPlaylist();
+            }
         });
 
         function searchTracks() {
@@ -226,12 +236,13 @@
             if (playlist_id != '' && playlist_id != null) {
                 $.post(window.location.href, 'action=next&playlist=' + playlist_id, function (data, status) {
                     track_info = JSON.parse(data);
-                    cb(track_info);
+                    window.localStorage.track_info = data;
+                    cb();
                 });
             }
         }
 
-        function setTrack(track_info) {
+        function setTrack() {
             $('#track').attr('href', track_info[2]);
             $('#track').html(track_info[5]);
             $('#artist').attr('href', track_info[2].substring(0, track_info[2].search('bandcamp.com')) + 'bandcamp.com');
@@ -257,8 +268,9 @@
             }
             $.post(window.location.href, body, function (data, status) {
                 playlist_id = data;
-                getNextTrack(playlist_id, function (track_info) {
-                    setTrack(track_info);
+                window.localStorage.playlist_id = playlist_id;
+                getNextTrack(playlist_id, function () {
+                    setTrack();
                     if (cb) {
                         cb();
                     }
@@ -274,7 +286,7 @@
             if (spotify_url == '') {
                 return;
             }
-            newPlaylist(function (track_info) {
+            newPlaylist(function () {
                 if (playing) {
                     $('#mp3')[0].play();
                 }
@@ -286,8 +298,8 @@
         function nextTrack(play = false) {
             playing = !$('#mp3')[0].paused
             $('#next').css('textShadow', 'none');
-            getNextTrack(playlist_id, function (track_info) {
-                setTrack(track_info);
+            getNextTrack(playlist_id, function () {
+                setTrack();
                 if (play || playing) {
                     $('#mp3')[0].play();
                 }
@@ -298,7 +310,7 @@
         function ejectTrack() {
             playing = !$('#mp3')[0].paused
             $('#eject').css('textShadow', 'none');
-            newPlaylist(function (track_info) {
+            newPlaylist(function () {
                 if (playing) {
                     $('#mp3')[0].play();
                 }
@@ -308,9 +320,6 @@
     </script>
 
     <style>
-        /*[class*='col'] { outline-style: solid; outline-color: red; }*/
-        /*[class*='row'] { outline-style: solid; outline-color: blue; }*/
-
         a,
         a:hover {
             text-decoration: none;
