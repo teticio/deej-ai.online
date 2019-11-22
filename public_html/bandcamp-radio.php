@@ -451,11 +451,17 @@
                 </div>
                 <div class="col-md-9 text-center">
                     <div class="d-flex align-items-center justify-content-between">
-                        <h5><img src="bandcamp-logo.png" style="height: 40px; width: auto;">&nbsp;radio</h5>
-                        <span class="fa-stack fa-2x" data-toggle="modal" data-target="#popupSpotify"
-                            onclick="getNumTracks();">
-                            <i class="fa fa-circle fa-stack-2x bandcamp-radio-icon-background" id="spotify"></i>
-                            <i class="fa fa-spotify fa-stack-1x fa-inverse bandcamp-radio-icon-foreground"></i>
+                        <span>
+                            <img src="bandcamp-logo.png" style="height: 35px; width: auto;">
+                            <span style="font-size: 16px;">radio</span>
+                        </span>
+                        <span>
+                            <span style="font-size: 16px;">Spotify</span>
+                            <span class="fa-stack fa-2x" data-toggle="modal" data-target="#popupSpotify"
+                                onclick="getNumTracks();">
+                                <i class="fa fa-circle fa-stack-2x bandcamp-radio-icon-background" id="spotify"></i>
+                                <i class="fa fa-spotify fa-stack-1x fa-inverse bandcamp-radio-icon-foreground"></i>
+                            </span>
                         </span>
                     </div>
                     <br>
