@@ -13,7 +13,6 @@
         CURLOPT_RETURNTRANSFER => true,
         CURLINFO_HEADER_OUT => true,
         CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => $payload,
     ];
 
     // directory to store active ids
