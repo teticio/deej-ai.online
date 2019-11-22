@@ -1,6 +1,6 @@
 <?php
     // make sure bandcamp server is running
-    $port = 5124;
+    $port = ($_SERVER['HTTP_HOST'] != 'localhost')? 5124: 5126;
     $bandcamp_server = 'http://localhost:' . $port . '/bandcamp_server';
     $connection = @fsockopen('localhost', $port);
     if (is_resource($connection)) {

@@ -12,7 +12,7 @@
     $api->setOptions(['auto_refresh' => true]);
 
     // make sure spotify server is running
-    $port = 5123;
+    $port = ($_SERVER['HTTP_HOST'] != 'localhost')? 5123: 5125;
     $spotify_server = 'http://localhost:' . $port . '/spotify_server';
     $connection = @fsockopen('localhost', $port);
     if (is_resource($connection)) {
