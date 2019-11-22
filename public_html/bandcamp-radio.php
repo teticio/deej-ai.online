@@ -351,6 +351,17 @@
             background-position: center top;
             height: 100%;
             font-family: 'Helvetica', 'Arial', sans-serif;
+            position: relative;
+            z-index: -10;
+        }
+
+        .bandcamp-radio-heading, .bandcamp-radio-heading:hover {
+            text-decoration: none;
+            color: inherit;
+            position: absolute;
+            top: 8px;
+            left: 16px;
+            z-index: -5;
         }
 
         .container {
@@ -432,6 +443,7 @@
     </div>
 
     <div class="container">
+        <h2><a href="/" class="bandcamp-radio-heading">Deej-A.I.</a></h2>
         <span class="bandcamp-radio">
             <div class="row align-items-center" id="player" style="visibility: hidden">
                 <div class="col-md-3">
