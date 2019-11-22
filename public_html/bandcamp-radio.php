@@ -194,22 +194,19 @@
         var playlist_id = null;
 
         $(document).ready(function () {
-            if (window.localStorage.id) {
-                id = window.localStorage.id;
-            } else {
-                id = getUniqueID();
-                window.localStorage.id = id;
-            }
             try {
-                track_info = JSON.parse(window.localStorage.track_info);
-            } catch {
-                track_info = null;
-            }
-            if (window.localStorage.playlist_id && track_info) {
+                id = window.localStorage.id;
                 playlist_id = window.localStorage.playlist_id;
+                track_info = JSON.parse(window.localStorage.track_info);
                 setTrack();
-            } else {
-                newPlaylist();
+            } finally {
+                if (!id || id =='') {
+                    id = getUniqueID();
+                    try { window.localStorage.id = id; } catch {}
+                }
+                if (!playlist_id || playlist_id == '' || !track_info || track_info.length == 0) {
+                    newPlaylist();
+                }
             }
         });
 
@@ -236,7 +233,7 @@
             if (playlist_id != '' && playlist_id != null) {
                 $.post(window.location.href, 'action=next&playlist=' + playlist_id, function (data, status) {
                     track_info = JSON.parse(data);
-                    window.localStorage.track_info = data;
+                    try { window.localStorage.track_info = data; } catch {}
                     cb();
                 });
             }
@@ -272,7 +269,7 @@
             }
             $.post(window.location.href, body, function (data, status) {
                 playlist_id = data;
-                window.localStorage.playlist_id = playlist_id;
+                try { window.localStorage.playlist_id = playlist_id; } catch {}
                 getNextTrack(playlist_id, function () {
                     setTrack();
                     if (cb) {
