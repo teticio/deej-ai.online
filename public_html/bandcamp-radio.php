@@ -200,7 +200,7 @@
                 track_info = JSON.parse(window.localStorage.track_info);
                 setTrack();
             } finally {
-                if (!id || id =='') {
+                if (!id || id == '') {
                     id = getUniqueID();
                     try { window.localStorage.id = id; } catch {}
                 }
