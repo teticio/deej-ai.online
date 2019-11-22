@@ -80,6 +80,9 @@ def make_bandcamp_playlist(urltovec,
 def search_spotify(string):
     offset = 0
     info = []
+    if string == '':
+        return info
+    tries = 50
     while len(info) < 100:
         try:
             client_credentials_manager = SpotifyClientCredentials(
@@ -103,8 +106,9 @@ def search_spotify(string):
                 break
 
         except Exception as e:
-            if 'Not found' in e.msg:
+            if 'Not found' in e.msg or tries <= 0:
                 break
+            tries -= 1
             app.logger.error(e)
 
     return info

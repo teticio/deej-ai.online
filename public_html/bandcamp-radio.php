@@ -211,16 +211,18 @@
         });
 
         function searchTracks() {
-            $.post(window.location.href, jQuery.param({
-                'action': 'search',
-                'string':  $('#search_input').val()
-            }), function (data, status) {
-                results = JSON.parse(data);
-                $('#search_results').find('option').not(':first').remove();
-                results.forEach(function (item) {
-                    $('#search_results').append(new Option(item['artist'] + ' - ' + item['track'], item['preview_url']));
+            if (search_input != '') {
+                $.post(window.location.href, jQuery.param({
+                    'action': 'search',
+                    'string':  $('#search_input').val()
+                }), function (data, status) {
+                    results = JSON.parse(data);
+                    $('#search_results').find('option').not(':first').remove();
+                    results.forEach(function (item) {
+                        $('#search_results').append(new Option(item['artist'] + ' - ' + item['track'], item['preview_url']));
+                    });
                 });
-            });
+            }
         }
 
         function getNumTracks() {
