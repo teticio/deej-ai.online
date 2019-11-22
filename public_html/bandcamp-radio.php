@@ -243,14 +243,18 @@
         }
 
         function setTrack() {
-            $('#track').attr('href', track_info[2]);
-            $('#track').html(track_info[5]);
-            $('#artist').attr('href', track_info[2].substring(0, track_info[2].search('bandcamp.com')) + 'bandcamp.com');
-            $('#artist').html(track_info[3]);
-            $('#mp3').attr('src', track_info[0]);
-            $('#album-art').attr('src', track_info[1]);
-            $('#album-link').attr('href', track_info[2]);
-            $('#player').css('visibility',  'visible');
+            if  (track_info[0].substring(0, 8) != '!DOCTYPE') {
+                $('#track').attr('href', track_info[2]);
+                $('#track').html(track_info[5]);
+                $('#artist').attr('href', track_info[2].substring(0, track_info[2].search('bandcamp.com')) + 'bandcamp.com');
+                $('#artist').html(track_info[3]);
+                $('#mp3').attr('src', track_info[0]);
+                $('#album-art').attr('src', track_info[1]);
+                $('#album-link').attr('href', track_info[2]);
+                $('#player').css('visibility',  'visible');
+            } else {
+                nextTrack();
+            }
         }
 
         function newPlaylist(cb = null, url = null) {
