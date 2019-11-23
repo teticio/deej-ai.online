@@ -252,33 +252,14 @@
         }
 
         function setTrack(play = false) {
+            $('#album-art').attr('src', 'art.php?hello&file=' + encodeURIComponent(track_info));
+//            $('#track').html(track_info);
             $('#artist').html(track_info);
-            $('#player').css('visibility',  'visible');
-            $('#mp3').attr('src', 'play.php?hello&file=' + encodeURI(track_info));
+            $('#mp3').attr('src', 'play.php?hello&file=' + encodeURIComponent(track_info));
             if (play) {
                 $('#mp3')[0].play();
             }
-            $.get('info.php', 'hello&file=' + encodeURI(track_info), function (data, status) {
-                $('#track').html(data);
-            });
-/*            if  (track_info[0].substring(0, 8) != '!DOCTYPE') {
-                $('#album-art').on('load', function () {
-                    $('#mp3').attr('src', track_info[0]);
-                    if (play) {
-                        $('#mp3')[0].play();
-                    }
-                    $('#player').css('visibility',  'visible');
-                    $('#track').attr('href', track_info[2]);
-                    $('#track').html(track_info[5]);
-                    $('#artist').attr('href', track_info[2].substring(0, track_info[2].search('rob.com')) + 'rob.com');
-                    $('#artist').html(track_info[3]);
-                    $('#album-link').attr('href', track_info[2]);
-                });
-                $('#album-art').attr('src', track_info[1]);
-            } else {
-                nextTrack();
-            }
-*/
+            $('#player').css('visibility',  'visible');
         }
 
         function newPlaylist(play = false, cb = null, url = null) {
