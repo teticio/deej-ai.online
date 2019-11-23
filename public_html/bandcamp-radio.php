@@ -253,12 +253,12 @@
                     if (play) {
                         $('#mp3')[0].play();
                     }
-                    $('#player').css('visibility',  'visible');
                     $('#track').attr('href', track_info[2]);
                     $('#track').html(track_info[5]);
                     $('#artist').attr('href', track_info[2].substring(0, track_info[2].search('bandcamp.com')) + 'bandcamp.com');
                     $('#artist').html(track_info[3]);
                     $('#album-link').attr('href', track_info[2]);
+                    $('#player').css('visibility',  'visible');
                 });
                 $('#album-art').attr('src', track_info[1]);
             } else {
