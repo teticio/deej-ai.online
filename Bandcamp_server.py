@@ -51,14 +51,14 @@ def make_bandcamp_playlist(urltovec,
         # vector seed
         candidates = most_similar_by_vec([urltovec], [1], [vecs])
         playlist = [track_ids[int(candidates[0][0][0])]]
-        app.logger.info(f'{len(playlist)}.* {tracks[playlist[-1]]}')
+        app.logger.info(f'{len(playlist)}. {tracks[playlist[-1]]}')
         yield playlist[-1]
 
     else:
         # track seed
         playlist = seed_tracks
         for i in range(0, len(seed_tracks)):
-            app.logger.info(f'{i+1}.* {tracks[seed_tracks[i]]}')
+            app.logger.info(f'{i+1}. {tracks[seed_tracks[i]]}')
             yield seed_tracks[i]
 
     while True:
@@ -73,7 +73,7 @@ def make_bandcamp_playlist(urltovec,
             if track_id not in playlist:
                 break
         playlist.append(track_id)
-        app.logger.info(f'{len(playlist)}.* {tracks[playlist[-1]]}')
+        app.logger.info(f'{len(playlist)}. {tracks[playlist[-1]]}')
         yield playlist[-1]
 
 

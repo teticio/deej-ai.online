@@ -244,8 +244,8 @@
                     'id': id,
                     'playlist':  playlist_id,
                 }), function (data, status) {
-                    track_info = JSON.parse(data);
-                    try { window.localStorage.track_info = data; } catch {}
+                    track_info = data;
+                    try { window.localStorage.rob_track_info = data; } catch {}
                     cb();
                 });
             }
@@ -254,6 +254,13 @@
         function setTrack(play = false) {
             $('#artist').html(track_info);
             $('#player').css('visibility',  'visible');
+            $('#mp3').attr('src', 'play.php?hello&file=' + encodeURI(track_info));
+            if (play) {
+                $('#mp3')[0].play();
+            }
+            $.get('info.php', 'hello&file=' + encodeURI(track_info), function (data, status) {
+                $('#track').html(data);
+            });
 /*            if  (track_info[0].substring(0, 8) != '!DOCTYPE') {
                 $('#album-art').on('load', function () {
                     $('#mp3').attr('src', track_info[0]);
@@ -474,14 +481,14 @@
                         <div>
                             <div class="d-inline-block">
                                 <h3 class="rob-radio-track">
-                                    <a href="" target="_blank" id="track"></a>
+                                    <span id="track"></span>
                                 </h3>
                             </div>
                         </div>
                         <div>
                             <div class="d-inline-block">
                                 <h4 class="rob-radio-artist">
-                                    <a href="" target="_blank" id="artist"></a>
+                                    <span id="artist"></span>
                                 </h4>
                             </div>
                         </div>
