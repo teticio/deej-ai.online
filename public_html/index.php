@@ -28,7 +28,7 @@
     ];
 
     // directory to store active ids
-    $ids_dir = '../spotify_ids';
+    $ids_dir = __DIR__ . '/../spotify_ids';
 
     // get playlist from spotify server
     function getPlaylist() {
@@ -39,8 +39,7 @@
         global $ids_dir;
 
         // create file that gets deleted if user goes away
-        $file = fopen($ids_dir .'/' . $_POST['id'], 'w');
-        fclose($file);
+        touch($ids_dir .'/' . $_POST['id']);
         $postdata = [
             'client_id' => $_POST['id'],
             'tracks' => isset($_POST['tracks'])? $_POST['tracks'] : [],

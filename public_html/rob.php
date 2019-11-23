@@ -1,12 +1,17 @@
 <?php
-    // make sure bandcamp server is running
-    $port = ($_SERVER['HTTP_HOST'] != 'localhost')? 5124: 5126;
-    $bandcamp_server = 'http://localhost:' . $port . '/bandcamp_server';
+    if (!isset($_GET['hello'])) {
+        include('404.html');
+        die();
+    }
+
+    // make sure rob server is running
+    $port = 5127;
+    $rob_server = 'http://localhost:' . $port . '/rob_server';
     $connection = @fsockopen('localhost', $port);
     if (is_resource($connection)) {
         fclose($connection);
     } else {
-        $output = exec('(cd ..; ./start_bandcamp_server ' . $port . ' > /dev/null 2> /dev/null &)');
+        $output = exec('(cd ..; ./start_rob_server ' . $port . ' > /dev/null 2> /dev/null &)');
         sleep(10);
     }
     $curlopts = [
@@ -16,16 +21,16 @@
     ];
 
     // directory to store active ids
-    $ids_dir = __DIR__ . '/../bandcamp_ids';
+    $ids_dir = __DIR__ . '/../rob_ids';
 
-    // remove old playlists on bandcamp server
+    // remove old playlists on rob server
     function removePlaylists($id) {
-        global $bandcamp_server;
+        global $rob_server;
         global $curlopts;
 
         $postdata = ['remove_playlists_for_client' => $id];
         $payload = json_encode($postdata); 
-        $ch = curl_init($bandcamp_server);
+        $ch = curl_init($rob_server);
         curl_setopt_array($ch, $curlopts);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -37,14 +42,14 @@
         curl_close($ch);
     }
 
-    // get search results from bandcamp server
+    // get search results from rob server
     function searchTracks() {
-        global $bandcamp_server;
+        global $rob_server;
         global $curlopts;
 
         $postdata = ['search_spotify' => $_POST['string']];
         $payload = json_encode($postdata); 
-        $ch = curl_init($bandcamp_server);
+        $ch = curl_init($rob_server);
         curl_setopt_array($ch, $curlopts);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -56,14 +61,14 @@
         curl_close($ch);
     }
 
-    // get number of tracks from bandcamp server
+    // get number of tracks from rob server
     function numTracks() {
-        global $bandcamp_server;
+        global $rob_server;
         global $curlopts;
 
         $postdata = ['num_tracks'];
         $payload = json_encode($postdata); 
-        $ch = curl_init($bandcamp_server);
+        $ch = curl_init($rob_server);
         curl_setopt_array($ch, $curlopts);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -75,9 +80,9 @@
         curl_close($ch);
     }
 
-    // get next track in playlist from bandcamp server
+    // get next track in playlist from rob server
     function nextTrack() {
-        global $bandcamp_server;
+        global $rob_server;
         global $curlopts;
         global $ids_dir;
 
@@ -85,7 +90,7 @@
         touch($ids_dir .'/' . $_POST['id']);
         $postdata = ['playlist_id' => $_POST['playlist']];
         $payload = json_encode($postdata); 
-        $ch = curl_init($bandcamp_server);
+        $ch = curl_init($rob_server);
         curl_setopt_array($ch, $curlopts);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -97,9 +102,9 @@
         curl_close($ch);
     }
 
-    // create new playlist on bandcamp server
+    // create new playlist on rob server
     function newPlaylist() {
-        global $bandcamp_server;
+        global $rob_server;
         global $curlopts;
         global $ids_dir;
 
@@ -113,11 +118,11 @@
         } else {
              $postdata = [
                 'client_id' => $_POST['id'],
-                'bandcamp_url' => ''
+                'mp3' => '',
             ];
         }
         $payload = json_encode($postdata); 
-        $ch = curl_init($bandcamp_server);
+        $ch = curl_init($rob_server);
         curl_setopt_array($ch, $curlopts);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -169,7 +174,7 @@
 <html lang="en">
 
 <head>
-    <title>Bandcamp Radio</title>
+    <title>Rob Radio</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -197,14 +202,14 @@
 
         $(document).ready(function () {
             try {
-                id = window.localStorage.id;
-                playlist_id = window.localStorage.playlist_id;
-                track_info = JSON.parse(window.localStorage.track_info);
+                id = window.localStorage.rob_id;
+                playlist_id = window.localStorage.rob_playlist_id;
+                track_info = window.localStorage.rob_track_info;
                 setTrack();
             } catch {}
             if (!id || id == '') {
                 id = getUniqueID();
-                try { window.localStorage.id = id; } catch {}
+                try { window.localStorage.rob_id = id; } catch {}
             }
             if (!playlist_id || playlist_id == '' || !track_info || track_info.length == 0) {
                 newPlaylist();
@@ -247,7 +252,9 @@
         }
 
         function setTrack(play = false) {
-            if  (track_info[0].substring(0, 8) != '!DOCTYPE') {
+            $('#artist').html(track_info);
+            $('#player').css('visibility',  'visible');
+/*            if  (track_info[0].substring(0, 8) != '!DOCTYPE') {
                 $('#album-art').on('load', function () {
                     $('#mp3').attr('src', track_info[0]);
                     if (play) {
@@ -256,7 +263,7 @@
                     $('#player').css('visibility',  'visible');
                     $('#track').attr('href', track_info[2]);
                     $('#track').html(track_info[5]);
-                    $('#artist').attr('href', track_info[2].substring(0, track_info[2].search('bandcamp.com')) + 'bandcamp.com');
+                    $('#artist').attr('href', track_info[2].substring(0, track_info[2].search('rob.com')) + 'rob.com');
                     $('#artist').html(track_info[3]);
                     $('#album-link').attr('href', track_info[2]);
                 });
@@ -264,6 +271,7 @@
             } else {
                 nextTrack();
             }
+*/
         }
 
         function newPlaylist(play = false, cb = null, url = null) {
@@ -281,7 +289,7 @@
             }
             $.post(window.location.href, body, function (data, status) {
                 playlist_id = data;
-                try { window.localStorage.playlist_id = playlist_id; } catch {}
+                try { window.localStorage.rob_playlist_id = playlist_id; } catch {}
                 getNextTrack(playlist_id, function () {
                     setTrack(play);
                     if (cb) {
@@ -291,7 +299,7 @@
             });
         }
 
-        function spotifyToBandcamp() {
+        function spotifyToRob() {
             playing = !$('#mp3')[0].paused
             $('#status').html('Analyzing');
             $('#num_tracks').show();
@@ -355,7 +363,7 @@
             z-index: -10;
         }
 
-        .bandcamp-radio-heading, .bandcamp-radio-heading:hover {
+        .rob-radio-heading, .rob-radio-heading:hover {
             text-decoration: none;
             color: inherit;
             position: absolute;
@@ -371,7 +379,7 @@
             align-items: center;
         }
 
-        .bandcamp-radio {
+        .rob-radio {
             background-color: #333;
             border-radius: 15px;
             padding: 20px;
@@ -379,16 +387,16 @@
             box-shadow: -5px 5px 8px #111;
         }
 
-        .bandcamp-radio-info {
+        .rob-radio-info {
             background-color: #222;
             box-shadow: inset -1px 1px 3px #111;
         }
 
-        .bandcamp-radio-track {
+        .rob-radio-track {
             font-weight: bold;
         }
 
-        .bandcamp-radio-artist {
+        .rob-radio-artist {
             font-style: italic;
         }
 
@@ -400,18 +408,18 @@
             vertical-align: middle;
         }
 
-        .bandcamp-radio-icon-foreground {
+        .rob-radio-icon-foreground {
             cursor: pointer;
             color: #333;
         }
 
-        .bandcamp-radio-icon-background {
+        .rob-radio-icon-background {
             cursor: pointer;
             color: #eee;
             text-shadow: -5px 5px 8px #111;
         }
 
-        .bandcamp-radio-icon-foreground:hover {
+        .rob-radio-icon-foreground:hover {
             color: #000;
         }
     </style>
@@ -423,7 +431,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header d-flex justify-content-between">
-                    <h4 class="modal-title">Spotify to Bandcamp</h4>
+                    <h4 class="modal-title">Spotify to Rob</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -431,7 +439,7 @@
                         id="search_input">
                     <label for="search_results">Search results</label>
                     <select class="form-control" style="overflow-x: scroll" id="search_results"
-                        oninput="spotifyToBandcamp()">
+                        oninput="spotifyToRob()">
                         <option value="" selected>Select...</option>
                     </select>
                 </div>
@@ -443,39 +451,36 @@
     </div>
 
     <div class="container">
-        <h2><a href="/" class="bandcamp-radio-heading">Deej-A.I.</a></h2>
-        <span class="bandcamp-radio">
+        <h2><a href="/" class="rob-radio-heading">Deej-A.I.</a></h2>
+        <span class="rob-radio">
             <div class="row align-items-center" id="player" style="visibility: hidden">
                 <div class="col-md-3">
                     <a href="" target="_blank" id="album-link"><img src="" width="100%" id="album-art"></a>
                 </div>
                 <div class="col-md-9 text-center">
                     <div class="d-flex align-items-center justify-content-between">
-                        <span>
-                            <img src="bandcamp-logo.png" style="height: 35px; width: auto;">
-                            <span style="font-size: 16px;">radio</span>
-                        </span>
+                        <span style="font-size: 16px;">Rob radio</span>
                         <span>
                             <span style="font-size: 16px;">Spotify</span>
                             <span class="fa-stack fa-2x" data-toggle="modal" data-target="#popupSpotify"
                                 onclick="getNumTracks();">
-                                <i class="fa fa-circle fa-stack-2x bandcamp-radio-icon-background" id="spotify"></i>
-                                <i class="fa fa-spotify fa-stack-1x fa-inverse bandcamp-radio-icon-foreground"></i>
+                                <i class="fa fa-circle fa-stack-2x rob-radio-icon-background" id="spotify"></i>
+                                <i class="fa fa-spotify fa-stack-1x fa-inverse rob-radio-icon-foreground"></i>
                             </span>
                         </span>
                     </div>
                     <br>
-                    <div class="bandcamp-radio-info">
+                    <div class="rob-radio-info">
                         <div>
                             <div class="d-inline-block">
-                                <h3 class="bandcamp-radio-track">
+                                <h3 class="rob-radio-track">
                                     <a href="" target="_blank" id="track"></a>
                                 </h3>
                             </div>
                         </div>
                         <div>
                             <div class="d-inline-block">
-                                <h4 class="bandcamp-radio-artist">
+                                <h4 class="rob-radio-artist">
                                     <a href="" target="_blank" id="artist"></a>
                                 </h4>
                             </div>
@@ -484,8 +489,8 @@
                     <br>
                     <div class="d-flex align-items-center">
                         <span class="fa-stack fa-2x" onclick="ejectTrack();">
-                            <i class="fa fa-circle fa-stack-2x bandcamp-radio-icon-background" id="eject"></i>
-                            <i class="fa fa-eject fa-stack-1x fa-inverse bandcamp-radio-icon-foreground"></i>
+                            <i class="fa fa-circle fa-stack-2x rob-radio-icon-background" id="eject"></i>
+                            <i class="fa fa-eject fa-stack-1x fa-inverse rob-radio-icon-foreground"></i>
                         </span>
                         <span style="display:inline-block; width: 10px;"></span>
                         <audio controls controlsList="nodownload" style="width:100%" onended="nextTrack(true);"
@@ -494,8 +499,8 @@
                         </audio>
                         <span style="display:inline-block; width: 10px;"></span>
                         <span class="fa-stack fa-2x" onclick="nextTrack();">
-                            <i class="fa fa-circle fa-stack-2x bandcamp-radio-icon-background" id="next"></i>
-                            <i class="fa fa-forward fa-stack-1x fa-inverse bandcamp-radio-icon-foreground"></i>
+                            <i class="fa fa-circle fa-stack-2x rob-radio-icon-background" id="next"></i>
+                            <i class="fa fa-forward fa-stack-1x fa-inverse rob-radio-icon-foreground"></i>
                         </span>
                     </div>
                 </div>
