@@ -4,6 +4,8 @@
         die();
     }
 
+    require '../vendor/autoload.php';
+
     // make sure rob server is running
     $port = 5127;
     $rob_server = 'http://localhost:' . $port . '/rob_server';
@@ -134,6 +136,23 @@
         curl_close($ch);
     }
 
+    function getInfo() {
+        $getID3 = new getID3;
+        $path = __DIR__ . '/../' .$_POST['file'];
+        $ThisFileInfo = $getID3->analyze($path);
+        getid3_lib::CopyTagsToComments($ThisFileInfo);
+        $art = $ThisFileInfo['comments']['picture'];
+        if (!empty($art)) {
+            $src = 'data:' . $art[0]['image_mime'] . ';charset=utf-8;base64,' . base64_encode($art[0]['data']);
+        } else {
+            $src =  'data:image/jpeg;charset=utf-8;base64,' . base64_encode(file_get_contents('record.jpg'));
+        }
+        $track = $ThisFileInfo['comments']['title'][0];
+        $artist = $ThisFileInfo['comments']['artist'][0];
+        $info = ['<img src="' . $src . '" width="100%">', $track, $artist];
+        print json_encode($info);
+    }
+
     // garbage collection
     $dir = new DirectoryIterator($ids_dir);
     foreach ($dir as $fileinfo) {
@@ -164,6 +183,10 @@
 
             case 'playlist':
                 newPlaylist();
+                break;
+
+            case 'info':
+                getInfo();
                 break;
         }
     } else {
@@ -252,14 +275,17 @@
         }
 
         function setTrack(play = false) {
-            $('#album-art').attr('src', 'art.php?hello&file=' + encodeURIComponent(track_info));
-//            $('#track').html(track_info);
-            $('#artist').html(track_info);
+            $.post(window.location.href, 'hello&action=info&file=' + encodeURIComponent(track_info), function (data, status) {
+                info = JSON.parse(data);
+                $('#album-art').html(info[0]);
+                $('#track').html(info[1]);
+                $('#artist').html(info[2]);
+                $('#player').css('visibility',  'visible');
+            });
             $('#mp3').attr('src', 'play.php?hello&file=' + encodeURIComponent(track_info));
             if (play) {
                 $('#mp3')[0].play();
             }
-            $('#player').css('visibility',  'visible');
         }
 
         function newPlaylist(play = false, cb = null, url = null) {
@@ -443,7 +469,7 @@
         <span class="rob-radio">
             <div class="row align-items-center" id="player" style="visibility: hidden">
                 <div class="col-md-3">
-                    <a href="" target="_blank" id="album-link"><img src="" width="100%" id="album-art"></a>
+                    <span id="album-art"></span>
                 </div>
                 <div class="col-md-9 text-center">
                     <div class="d-flex align-items-center justify-content-between">
