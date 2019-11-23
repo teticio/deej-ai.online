@@ -199,14 +199,13 @@
                 playlist_id = window.localStorage.playlist_id;
                 track_info = JSON.parse(window.localStorage.track_info);
                 setTrack();
-            } finally {
-                if (!id || id == '') {
-                    id = getUniqueID();
-                    try { window.localStorage.id = id; } catch {}
-                }
-                if (!playlist_id || playlist_id == '' || !track_info || track_info.length == 0) {
-                    newPlaylist();
-                }
+            } catch {}
+            if (!id || id == '') {
+                id = getUniqueID();
+                try { window.localStorage.id = id; } catch {}
+            }
+            if (!playlist_id || playlist_id == '' || !track_info || track_info.length == 0) {
+                newPlaylist();
             }
         });
 
