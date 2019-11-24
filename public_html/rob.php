@@ -149,6 +149,12 @@
         }
         $track = $ThisFileInfo['comments']['title'][0];
         $artist = $ThisFileInfo['comments']['artist'][0];
+        if ($track == null) {
+            $track = $ThisFileInfo['filename'];
+        }
+        if ($artist == null) {
+            $artist = 'Unknown';
+        }
         $info = ['<img src="' . $src . '" width="100%">', $track, $artist];
         print json_encode($info);
     }
