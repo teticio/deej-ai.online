@@ -513,7 +513,7 @@
                             <i class="fa fa-eject fa-stack-1x fa-inverse rob-radio-icon-foreground"></i>
                         </span>
                         <span style="display:inline-block; width: 10px;"></span>
-                        <audio controls controlsList="nodownload" style="width:100%" onended="nextTrack(true);"
+                        <audio controls style="width:100%" onended="nextTrack(true);"
                             id="mp3">
                             <source src="" type="audio/mp3">
                         </audio>
