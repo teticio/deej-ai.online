@@ -156,9 +156,9 @@
     // garbage collection
     $dir = new DirectoryIterator($ids_dir);
     foreach ($dir as $fileinfo) {
-        if (!$fileinfo->isDot() && filemtime($fileinfo->getPathname()) - time() > strtotime('1 day', 0)) {
+        if (!$fileinfo->isDot() && time() - filemtime($fileinfo->getPathname()) > strtotime('1 day', 0)) {
             unlink($fileinfo->getPathname());
-            removePlaylist($fileinfo->getFilename());
+            removePlaylists($fileinfo->getFilename());
         }
     }
 
