@@ -4,13 +4,14 @@
         die();
     }
 
-    $file = __DIR__ . '/../' .$_GET['file'];;
+    $file = __DIR__ . '/../' . $_GET['file'];;
     $fp = @fopen($file, 'rb');
     $size = filesize($file); // File size
     $length = $size; // Content length
     $start = 0; // Start byte
     $end = $size - 1; // End byte
     header('Content-type: audio/mpeg');
+    header('Content-Disposition: filename="' . basename($file) . '"');
     //header("Accept-Ranges: 0-$length");
     header("Accept-Ranges: bytes");
     if (isset($_SERVER['HTTP_RANGE'])) {
@@ -44,7 +45,7 @@
         header('HTTP/1.1 206 Partial Content');
     }
     header("Content-Range: bytes $start-$end/$size");
-    header("Content-Length: ".$length);
+    header("Content-Length: " . $length);
     $buffer = 1024 * 8;
     while(!feof($fp) && ($p = ftell($fp)) <= $end) {
         if ($p + $buffer > $end) {
