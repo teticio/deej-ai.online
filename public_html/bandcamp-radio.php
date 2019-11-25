@@ -488,11 +488,11 @@
                             <i class="fa fa-eject fa-stack-1x fa-inverse bandcamp-radio-icon-foreground"></i>
                         </span>
                         <span style="display: inline-block; width: 10px;"></span>
-                        <audio controls controlsList="nodownload" style="width: 100%" onended="nextTrack(true);"
+                        <audio controls preload="auto" style="width: 100%" onended="nextTrack(true);"
                             id="mp3">
                             <source src="" type="audio/mp3">
                         </audio>
-                        <audio controls autoplay loop style="display: none;" id="hack">
+                        <audio controls autoplay loop preload="auto" style="display: none;" id="hack">
                             <source src="silence.mp3" type="audio/mp3">
                         </audio>
                         <span style="display: inline-block; width: 10px;"></span>
