@@ -286,7 +286,7 @@
                 $('#album-art').html(info[0]);
                 $('#track').html(info[1]);
                 $('#artist').html(info[2]);
-                $(document).prop('title', info[2] + '- ' + info[1]);
+                $(document).prop('title', info[2] + ' - ' + info[1]);
             });
             $('#mp3').attr('autoplay', play);
             $('#mp3').attr('src', 'play.php?hello&file=' + encodeURIComponent(track_info[0]));

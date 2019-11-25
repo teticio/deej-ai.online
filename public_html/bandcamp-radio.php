@@ -254,7 +254,7 @@
                 $('#artist').attr('href', track_info[0][2].substring(0, track_info[0][2].search('bandcamp.com')) + 'bandcamp.com');
                 $('#artist').html(track_info[0][3]);
                 $('#album-link').attr('href', track_info[0][2]);
-                $(document).prop('title', track_info[0][3] + '- ' + track_info[0][5]);
+                $(document).prop('title', track_info[0][3] + ' - ' + track_info[0][5]);
                 $('#mp3').attr('autoplay', play);
                 $('#mp3').attr('src', track_info[0][0]);
                 $('#mp3')[0].load();
