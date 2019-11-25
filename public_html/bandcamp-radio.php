@@ -492,6 +492,9 @@
                             id="mp3">
                             <source src="" type="audio/mp3">
                         </audio>
+                        <audio controls autoplay loop style="display: none;" id="hack">
+                            <source src="silence.mp3" type="audio/mp3">
+                        </audio>
                         <span style="display: inline-block; width: 10px;"></span>
                         <span class="fa-stack fa-2x" onclick="nextTrack();">
                             <i class="fa fa-circle fa-stack-2x bandcamp-radio-icon-background" id="next"></i>
