@@ -512,12 +512,15 @@
                             <i class="fa fa-circle fa-stack-2x rob-radio-icon-background" id="eject"></i>
                             <i class="fa fa-eject fa-stack-1x fa-inverse rob-radio-icon-foreground"></i>
                         </span>
-                        <span style="display:inline-block; width: 10px;"></span>
-                        <audio controls style="width:100%" onended="nextTrack(true);"
+                        <span style="display: inline-block; width: 10px;"></span>
+                        <audio controls style="width: 100%" onended="nextTrack(true);"
                             id="mp3">
                             <source src="" type="audio/mp3">
                         </audio>
-                        <span style="display:inline-block; width: 10px;"></span>
+                        <audio controls autoplay loop style="display: none;" id="hack">
+                            <source src="silence.mp3" type="audio/mp3">
+                        </audio>
+                        <span style="display: inline-block; width: 10px;"></span>
                         <span class="fa-stack fa-2x" onclick="nextTrack();">
                             <i class="fa fa-circle fa-stack-2x rob-radio-icon-background" id="next"></i>
                             <i class="fa fa-forward fa-stack-1x fa-inverse rob-radio-icon-foreground"></i>
