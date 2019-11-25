@@ -51,14 +51,16 @@ def make_playlist(urltovec,
         candidates = most_similar_by_vec([urltovec], [1], [vecs])
         playlist = [track_ids[int(candidates[0][0][0])]]
         app.logger.info(f'{len(playlist)}. {playlist[-1]}')
-        yield playlist[-1]
+        if len(playlist) > 1:
+            yield [playlist[-2], playlist[-1]]
 
     else:
         # track seed
         playlist = seed_tracks
         for i in range(0, len(seed_tracks)):
             app.logger.info(f'{i+1}. {seed_tracks[i]}')
-            yield seed_tracks[i]
+            if (i > 1):
+                yield [seed_tracks[i-1], seed_tracks[i]]
 
     while True:
         if len(playlist) > lookback:
@@ -73,7 +75,8 @@ def make_playlist(urltovec,
                 break
         playlist.append(track_id)
         app.logger.info(f'{len(playlist)}. {playlist[-1]}')
-        yield playlist[-1]
+        if len(playlist) > 1:
+            yield [playlist[-2], playlist[-1]]
 
 
 def search_spotify(string):
@@ -166,7 +169,7 @@ def post():
         playlist_id = content['playlist_id']
         if playlist_id in playlist_cache:
             mp3 = next(playlist_cache[playlist_id])
-            response = mp3
+            response = jsonify(mp3)
         else:
             app.logger.error(f'Missing playlist {playlist_id}')
 

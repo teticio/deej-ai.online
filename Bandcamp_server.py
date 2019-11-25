@@ -52,14 +52,16 @@ def make_bandcamp_playlist(urltovec,
         candidates = most_similar_by_vec([urltovec], [1], [vecs])
         playlist = [track_ids[int(candidates[0][0][0])]]
         app.logger.info(f'{len(playlist)}. {tracks[playlist[-1]]}')
-        yield playlist[-1]
+        if len(playlist) > 1:
+            yield [playlist[-2], playlist[-1]]
 
     else:
         # track seed
         playlist = seed_tracks
         for i in range(0, len(seed_tracks)):
             app.logger.info(f'{i+1}. {tracks[seed_tracks[i]]}')
-            yield seed_tracks[i]
+            if (i > 1):
+                yield [seed_tracks[i-1], seed_tracks[i]]
 
     while True:
         if len(playlist) > lookback:
@@ -74,7 +76,8 @@ def make_bandcamp_playlist(urltovec,
                 break
         playlist.append(track_id)
         app.logger.info(f'{len(playlist)}. {tracks[playlist[-1]]}')
-        yield playlist[-1]
+        if len(playlist) > 1:
+            yield [playlist[-2], playlist[-1]]
 
 
 def search_spotify(string):
@@ -169,14 +172,17 @@ def post():
     elif 'playlist_id' in content:
         playlist_id = content['playlist_id']
         if playlist_id in playlist_cache:
-            url = next(playlist_cache[playlist_id])
-            html = str(requests.get(url).content)
-            mp3_url = html[html.find('{"mp3-128":"') + len('{"mp3-128":"'):]
-            mp3_url = mp3_url[:mp3_url.find('"}')]
-            jpg_url = html[html.find('tralbumArt') + len('tralbumArt'):]
-            jpg_url = jpg_url[jpg_url.find('img src="') + len('img src="'):]
-            jpg_url = jpg_url[:jpg_url.find('"')]
-            response = jsonify((mp3_url, jpg_url, url) + tracks[url])
+            urls = next(playlist_cache[playlist_id])
+            info = []
+            for url in urls:
+                html = str(requests.get(url).content)
+                mp3_url = html[html.find('{"mp3-128":"') + len('{"mp3-128":"'):]
+                mp3_url = mp3_url[:mp3_url.find('"}')]
+                jpg_url = html[html.find('tralbumArt') + len('tralbumArt'):]
+                jpg_url = jpg_url[jpg_url.find('img src="') + len('img src="'):]
+                jpg_url = jpg_url[:jpg_url.find('"')]
+                info.append((mp3_url, jpg_url, url) + tracks[url])
+            response = jsonify(info)
         else:
             app.logger.error(f'Missing playlist {playlist_id}')
 

@@ -233,14 +233,14 @@
             try {
                 id = window.localStorage.rob_id;
                 playlist_id = window.localStorage.rob_playlist_id;
-                track_info = window.localStorage.rob_track_info;
+                track_info = JSON.parse(window.localStorage.rob_track_info);
                 setTrack();
             } catch {}
             if (!id || id == '') {
                 id = getUniqueID();
                 try { window.localStorage.rob_id = id; } catch {}
             }
-            if (!playlist_id || playlist_id == '' || !track_info || track_info.length == 0) {
+            if (!playlist_id || playlist_id == '' || !track_info || track_info.length != 2) {
                 newPlaylist();
             }
         });
@@ -273,7 +273,7 @@
                     'id': id,
                     'playlist':  playlist_id,
                 }), function (data, status) {
-                    track_info = data;
+                    track_info = JSON.parse(data);
                     try { window.localStorage.rob_track_info = data; } catch {}
                     cb();
                 });
@@ -281,15 +281,22 @@
         }
 
         function setTrack(play = false) {
-            $.post(window.location.href, 'hello&action=info&file=' + encodeURIComponent(track_info), function (data, status) {
+            $.post(window.location.href, 'hello&action=info&file=' + encodeURIComponent(track_info[0]), function (data, status) {
                 info = JSON.parse(data);
                 $('#album-art').html(info[0]);
                 $('#track').html(info[1]);
                 $('#artist').html(info[2]);
-                $('#player').css('visibility',  'visible');
+                $(document).prop('title', info[2] + '- ' + info[1]);
             });
             $('#mp3').attr('autoplay', play);
-            $('#mp3').attr('src', 'play.php?hello&file=' + encodeURIComponent(track_info));
+            $('#mp3').attr('src', 'play.php?hello&file=' + encodeURIComponent(track_info[0]));
+            $('#mp3')[0].load();
+            if (play) {
+                $('#mp3')[0].play();
+            }
+            // preload next track
+            $('#next-mp3').attr('src', 'play.php?hello&file=' + encodeURIComponent(track_info[1]));
+            $('#next-mp3')[0].load();
         }
 
         function newPlaylist(play = false, cb = null, url = null) {
@@ -471,7 +478,7 @@
     <div class="container">
         <h2><a href="/" class="rob-radio-heading">Deej-A.I.</a></h2>
         <span class="rob-radio">
-            <div class="row align-items-center" id="player" style="visibility: hidden">
+            <div class="row align-items-center" id="player">
                 <div class="col-md-3">
                     <span id="album-art"></span>
                 </div>
@@ -515,8 +522,9 @@
                             id="mp3">
                             <source src="" type="audio/mp3">
                         </audio>
-                        <audio controls autoplay loop preload="auto" style="display: none;" id="hack">
-                            <source src="silence.mp3" type="audio/mp3">
+                        <audio controls preload="auto" style="display: none;"
+                            id="next-mp3">
+                            <source src="" type="audio/mp3">
                         </audio>
                         <span style="display: inline-block; width: 10px;"></span>
                         <span class="fa-stack fa-2x" onclick="nextTrack();">

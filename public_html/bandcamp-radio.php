@@ -206,7 +206,7 @@
                 id = getUniqueID();
                 try { window.localStorage.id = id; } catch {}
             }
-            if (!playlist_id || playlist_id == '' || !track_info || track_info.length == 0) {
+            if (!playlist_id || playlist_id == '' || !track_info || track_info.length != 2) {
                 newPlaylist();
             }
         });
@@ -247,18 +247,23 @@
         }
 
         function setTrack(play = false) {
-            if  (track_info[0].substring(0, 8) != '!DOCTYPE') {
-                $('#album-art').on('load', function () {
-                    $('#mp3').attr('autoplay', play);
-                    $('#mp3').attr('src', track_info[0]);
-                    $('#track').attr('href', track_info[2]);
-                    $('#track').html(track_info[5]);
-                    $('#artist').attr('href', track_info[2].substring(0, track_info[2].search('bandcamp.com')) + 'bandcamp.com');
-                    $('#artist').html(track_info[3]);
-                    $('#album-link').attr('href', track_info[2]);
-                    $('#player').css('visibility',  'visible');
-                });
-                $('#album-art').attr('src', track_info[1]);
+            if  (track_info[0][0].substring(0, 8) != '!DOCTYPE') {
+                $('#album-art').attr('src', track_info[0][1]);
+                $('#track').attr('href', track_info[0][2]);
+                $('#track').html(track_info[0][5]);
+                $('#artist').attr('href', track_info[0][2].substring(0, track_info[0][2].search('bandcamp.com')) + 'bandcamp.com');
+                $('#artist').html(track_info[0][3]);
+                $('#album-link').attr('href', track_info[0][2]);
+                $(document).prop('title', track_info[0][3] + '- ' + track_info[0][5]);
+                $('#mp3').attr('autoplay', play);
+                $('#mp3').attr('src', track_info[0][0]);
+                $('#mp3')[0].load();
+                if (play) {
+                    $('#mp3')[0].play();
+                }
+                // preload next track
+                $('#next-mp3').attr('src', track_info[1][0]);
+                $('#next-mp3')[0].load();
             } else {
                 nextTrack();
             }
@@ -443,7 +448,7 @@
     <div class="container">
         <h2><a href="/" class="bandcamp-radio-heading">Deej-A.I.</a></h2>
         <span class="bandcamp-radio">
-            <div class="row align-items-center" id="player" style="visibility: hidden">
+            <div class="row align-items-center" id="player">
                 <div class="col-md-3">
                     <a href="" target="_blank" id="album-link"><img src="" width="100%" id="album-art"></a>
                 </div>
@@ -490,8 +495,9 @@
                             id="mp3">
                             <source src="" type="audio/mp3">
                         </audio>
-                        <audio controls autoplay loop preload="auto" style="display: none;" id="hack">
-                            <source src="silence.mp3" type="audio/mp3">
+                        <audio controls preload="auto" style="display: none;"
+                            id="next-mp3">
+                            <source src="" type="audio/mp3">
                         </audio>
                         <span style="display: inline-block; width: 10px;"></span>
                         <span class="fa-stack fa-2x" onclick="nextTrack();">
