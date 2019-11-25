@@ -249,10 +249,8 @@
         function setTrack(play = false) {
             if  (track_info[0].substring(0, 8) != '!DOCTYPE') {
                 $('#album-art').on('load', function () {
+                    $('#mp3').attr('autoplay', play);
                     $('#mp3').attr('src', track_info[0]);
-                    if (play) {
-                        $('#mp3')[0].play();
-                    }
                     $('#track').attr('href', track_info[2]);
                     $('#track').html(track_info[5]);
                     $('#artist').attr('href', track_info[2].substring(0, track_info[2].search('bandcamp.com')) + 'bandcamp.com');

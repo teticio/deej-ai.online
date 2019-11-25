@@ -288,10 +288,8 @@
                 $('#artist').html(info[2]);
                 $('#player').css('visibility',  'visible');
             });
+            $('#mp3').attr('autoplay', play);
             $('#mp3').attr('src', 'play.php?hello&file=' + encodeURIComponent(track_info));
-            if (play) {
-                $('#mp3')[0].play();
-            }
         }
 
         function newPlaylist(play = false, cb = null, url = null) {
