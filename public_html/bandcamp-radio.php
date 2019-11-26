@@ -492,7 +492,7 @@
                         </span>
                         <span style="display: inline-block; width: 10px;"></span>
                         <audio controls preload="auto" style="width: 100%" onended="nextTrack(true);"
-                            id="mp3">
+                            id="mp3" controlsList="nodownload">
                             <source src="" type="audio/mp3">
                         </audio>
                         <audio controls preload="auto" style="display: none;"
