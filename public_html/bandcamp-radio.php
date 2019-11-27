@@ -491,11 +491,11 @@
                             <i class="fa fa-eject fa-stack-1x fa-inverse bandcamp-radio-icon-foreground"></i>
                         </span>
                         <span style="display: inline-block; width: 10px;"></span>
-                        <audio controls preload="auto" style="width: 100%" onended="nextTrack(true);"
+                        <audio controls autobuffer preload="auto" style="width: 100%" onended="nextTrack(true);"
                             id="mp3" controlsList="nodownload">
                             <source src="" type="audio/mp3">
                         </audio>
-                        <audio controls preload="auto" style="display: none;"
+                        <audio controls autobuffer preload="auto" style="display: none;"
                             id="next-mp3">
                             <source src="" type="audio/mp3">
                         </audio>
