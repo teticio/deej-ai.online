@@ -201,10 +201,10 @@
                 playlist_id = window.localStorage.playlist_id;
                 track_info = JSON.parse(window.localStorage.track_info);
                 setTrack();
-            } catch {}
+            } catch(e) { ; }
             if (!id || id == '') {
                 id = getUniqueID();
-                try { window.localStorage.id = id; } catch {}
+                try { window.localStorage.id = id; } catch(e) { ; }
             }
             if (!playlist_id || playlist_id == '' || !track_info || track_info.length != 2) {
                 newPlaylist();
@@ -240,7 +240,7 @@
                     'playlist':  playlist_id,
                 }), function (data, status) {
                     track_info = JSON.parse(data);
-                    try { window.localStorage.track_info = data; } catch {}
+                    try { window.localStorage.track_info = data; } catch(e) { ; }
                     cb();
                 });
             }
@@ -284,7 +284,7 @@
             }
             $.post(window.location.href, body, function (data, status) {
                 playlist_id = data;
-                try { window.localStorage.playlist_id = playlist_id; } catch {}
+                try { window.localStorage.playlist_id = playlist_id; } catch(e) { ; }
                 getNextTrack(playlist_id, function () {
                     setTrack(play);
                     if (cb) {
