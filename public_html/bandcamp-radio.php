@@ -239,9 +239,17 @@
                     'id': id,
                     'playlist':  playlist_id,
                 }), function (data, status) {
-                    track_info = JSON.parse(data);
-                    try { window.localStorage.track_info = data; } catch(e) { ; }
-                    cb();
+                    if (data == 'Missing playlist') {
+                        alert('Playlist no longer available.\nLet me create a new one for you...');
+                        playing = !$('#mp3')[0].paused;
+                        newPlaylist(playing, function () {
+                            $('#next').css('textShadow', '-5px 5px 8px #111');
+                        });
+                    } else {
+                        track_info = JSON.parse(data);
+                        try { window.localStorage.track_info = data; } catch(e) { ; }
+                        cb();
+                    }
                 });
             }
         }
@@ -295,7 +303,7 @@
         }
 
         function spotifyToBandcamp() {
-            playing = !$('#mp3')[0].paused
+            playing = !$('#mp3')[0].paused;
             $('#status').html('Analyzing');
             $('#num_tracks').show();
             spotify_url = $('#search_results :selected').val();
@@ -309,7 +317,7 @@
         }
 
         function nextTrack(play = false) {
-            playing = !$('#mp3')[0].paused
+            playing = !$('#mp3')[0].paused;
             $('#next').css('textShadow', 'none');
             getNextTrack(playlist_id, function () {
                 setTrack(play || playing);
@@ -318,7 +326,7 @@
         }
 
         function ejectTrack() {
-            playing = !$('#mp3')[0].paused
+            playing = !$('#mp3')[0].paused;
             $('#eject').css('textShadow', 'none');
             newPlaylist(playing, function () {
                 $('#eject').css('textShadow', '-5px 5px 8px #111');

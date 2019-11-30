@@ -171,7 +171,7 @@ def post():
             mp3 = next(playlist_cache[playlist_id])
             response = jsonify(mp3)
         else:
-            app.logger.error(f'Missing playlist {playlist_id}')
+            response = 'Missing playlist'
 
     elif 'spotify_url' in content:
         client_id = content.get('client_id', None)

@@ -184,7 +184,7 @@ def post():
                 info.append((mp3_url, jpg_url, url) + tracks[url])
             response = jsonify(info)
         else:
-            app.logger.error(f'Missing playlist {playlist_id}')
+            response = 'Missing playlist'
 
     elif 'spotify_url' in content:
         client_id = content.get('client_id', None)
