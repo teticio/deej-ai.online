@@ -55,8 +55,8 @@
     <div class="container">
         <div>
             <br>
-            <h2>Generate random text with OpenAI's 1.5B parameter GPT-2 model</h2>
-            <textarea id="query" value="" rows="5" style="width: 100%;"></textarea>
+            <b>Generate random text with OpenAI's 1.5B parameter GPT-2 model</b>
+            <textarea id="query" value="" rows="3" style="width: 100%;"></textarea>
             <button id="generate" onclick="doQuery();">Generate</button>
         </div>
         <div>
