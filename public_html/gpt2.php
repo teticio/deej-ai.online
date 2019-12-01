@@ -34,6 +34,9 @@
 
     <script>
         function doQuery() {
+            if ($('#query').val() == '') {
+                return;
+            }
             $('#generate').prop('disabled', true);
             $('#result').html('Please wait...');
             $.post(window.location.href, '?hello&query=' + $('#query').val(), function (data, status) {
