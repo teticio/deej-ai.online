@@ -3,6 +3,7 @@
 .ipynb_checkpoints
 vendor
 server.log
+generate.log
 spotify_ids
 bandcamp_ids
 rob_ids
