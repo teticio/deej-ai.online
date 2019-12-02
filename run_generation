@@ -1,3 +1,0 @@
-#!/bin/bash
-source /home/teticio/virtualenvs/aventuras-con-textos-34W14zyb/bin/activate
-PYTHONIOENCODING=UTF-8 PYTORCH_TRANSFORMERS_CACHE=/home/teticio/.cache/torch/transformers python3 /home/teticio/ML/transformers/examples/run_generation.py "$@" 2> /var/www/html/deej-ai.online/generate.log

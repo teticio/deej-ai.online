@@ -12,8 +12,7 @@
 
     if (isset($_POST['query'])) {
         $prompt = str_replace("'", "'\''", $_POST['query']);
-        $command = "LANG=C.UTF-8 ../run_generation --model_type=gpt2 --model_name_or_path=gpt2-xl " .
-            "--length=200 --seed=$seed --stop_token='<|endoftext|>' --prompt='$prompt'";
+        $command = "LANG=C.UTF-8 ../GPT-2 --length=500 --seed=$seed --prompt='$prompt'";
         $output = shell_exec($command);
         print $output;
     } else {
