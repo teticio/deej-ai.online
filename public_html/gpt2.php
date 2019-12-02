@@ -4,10 +4,16 @@
         die();
     }
 
+    if (isset($_GET['seed'])) {
+        $seed = $_GET['seed'];
+    } else {
+        $seed = mt_rand();
+    }
+
     if (isset($_POST['query'])) {
-        $prompt = str_replace("'", "'\''", mb_convert_encoding($_POST['query'], 'utf-8'));
+        $prompt = str_replace("'", "'\''", $_POST['query']);
         $command = "LANG=C.UTF-8 ../run_generation --model_type=gpt2 --model_name_or_path=gpt2-xl " .
-            "--length=200 --seed=" . mt_rand() . " --prompt='" . $prompt . "'";
+            "--length=200 --seed=$seed --stop_token='<|endoftext|>' --prompt='$prompt'";
         $output = shell_exec($command);
         print $output;
     } else {
