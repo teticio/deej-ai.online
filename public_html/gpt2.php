@@ -69,9 +69,13 @@
                 var tail = setInterval(function () {
                     $.post(window.location.href, '?hello&result=' + id, function (data, status) {
                         result = JSON.parse(data);
-                        var chunk = result['text'].substr(text.length);
-                        text += chunk;
-                        $('#result').html($('#result').html() + chunk.replace(/\n/g, '<br />'));
+                        if (result['text'] == 'Please try again when I am less busy...\n') {
+                            $('#result').html(result['text']);
+                        } else if (result['text'] != '') {
+                            var chunk = result['text'].substr(text.length);
+                            text += chunk;
+                            $('#result').html($('#result').html() + chunk.replace(/\n/g, '<br />'));
+                        }
                         if (result['done']) {
                             clearInterval(tail);
                             $('#generate').prop('disabled', false).html('Generate');
