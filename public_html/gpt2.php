@@ -95,7 +95,7 @@
         <div>
             <br>
             <b>Generate random text with OpenAI's 1.5B parameter GPT-2 model</b>
-            <textarea id="query" value="" rows="3" style="width: 100%;"></textarea>
+            <textarea id="query" placeholder="Prompt" value="" rows="3" style="width: 100%;"></textarea>
             <button id="generate" onclick="doQuery();">Generate</button>
         </div>
         <div>
