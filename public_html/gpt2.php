@@ -10,11 +10,34 @@
         $seed = mt_rand();
     }
 
+    // directory to store active sessions
+    $ids_dir = '../gpt2';
+
+    // garbage collection
+    $dir = new DirectoryIterator(__DIR__ . "/$ids_dir");
+    foreach ($dir as $fileinfo) {
+        if (!$fileinfo->isDot() && time() - filemtime($fileinfo->getPathname()) > strtotime('1 day', 0)) {
+            unlink($fileinfo->getPathname());
+        }
+    }
+
     if (isset($_POST['query'])) {
+        $id = uniqid();
         $prompt = str_replace("'", "'\''", $_POST['query']);
-        $command = "LANG=C.UTF-8 ../GPT-2 --length=500 --seed=$seed --prompt='$prompt'";
-        $output = shell_exec($command);
-        print $output;
+        $command = "LANG=C.UTF-8 ../GPT2 $id --length=500 --seed=$seed --prompt='$prompt' > $ids_dir/$id &";
+        shell_exec($command);
+        print $id;
+
+    } elseif (isset($_POST['result'])) {
+        $text = file_get_contents("$ids_dir/" . $_POST['result']);
+        $done = !file_exists(__DIR__ . "/$ids_dir/" . $_POST['result'] . '.lock');
+        print json_encode([
+            'text' => $text,
+            'done' => $done
+        ]);
+        if ($done) {
+            unlink("$ids_dir/" . $_POST['result']);
+        }
     } else {
 
 ?>
@@ -38,15 +61,23 @@
             if ($('#query').val() == '') {
                 $('#query').val(' ');
             }
-            $('#generate').prop('disabled', true);
-            $('#result').html('Please wait...');
+            $('#generate').prop('disabled', true).html('Please wait...');
             $.post(window.location.href, '?hello&query=' + $('#query').val(), function (data, status) {
-                if (data == '') {
-                    $('#result').html('Please try again later when I am less busy...');
-                    return;
-                }
-                $('#result').html('<b>' + $('#query').val() + '</b>' + data.replace(/\n/g, '<br />'));
-                $('#generate').prop('disabled', false);
+                var id = data;
+                var text = '';
+                $('#result').html('<b>' + $('#query').val() + '</b>');
+                var tail = setInterval(function () {
+                    $.post(window.location.href, '?hello&result=' + id, function (data, status) {
+                        result = JSON.parse(data);
+                        var chunk = result['text'].substr(text.length);
+                        text += chunk;
+                        $('#result').html($('#result').html() + chunk.replace(/\n/g, '<br />'));
+                        if (result['done']) {
+                            clearInterval(tail);
+                            $('#generate').prop('disabled', false).html('Generate');
+                        }
+                    });
+                }, 100);
             });
         }
     </script>

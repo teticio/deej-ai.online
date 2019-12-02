@@ -1,0 +1,5 @@
+#!/bin/bash
+touch ../gpt2/$1.lock
+source /home/teticio/virtualenvs/aventuras-con-textos-34W14zyb/bin/activate
+PYTHONIOENCODING=UTF-8 PYTORCH_TRANSFORMERS_CACHE=/home/teticio/.cache/torch/transformers python3 /home/teticio/ML/aventuras-con-textos/GPT2.py "${@:2}" 2> /var/www/html/deej-ai.online/generate.log
+rm ../gpt2/$1.lock
