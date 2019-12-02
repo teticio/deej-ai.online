@@ -37,11 +37,15 @@
     <script>
         function doQuery() {
             if ($('#query').val() == '') {
-                return;
+                $('#query').val(' ');
             }
             $('#generate').prop('disabled', true);
             $('#result').html('Please wait...');
             $.post(window.location.href, '?hello&query=' + $('#query').val(), function (data, status) {
+                if (data == '') {
+                    $('#result').html('Please try again later when I am less busy...');
+                    return;
+                }
                 $('#result').html('<b>' + $('#query').val() + '</b>' + data.replace(/\n/g, '<br />'));
                 $('#generate').prop('disabled', false);
             });
