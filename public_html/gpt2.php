@@ -88,7 +88,7 @@
             font-size: 20px;
         }
     </style>
-    </head>
+</head>
 
 <body>
     <div class="container">
