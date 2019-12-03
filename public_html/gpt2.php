@@ -65,14 +65,14 @@
             if ($('#query').val() == '') {
                 $('#query').val(' ');
             }
+            $('#seed').empty();
             $('#generate').prop('disabled', true).html('Please wait...');
+            $('#result').html('<b>' + $('#query').val().replace(/\n/g, '<br />') + '</b>');
             $.post(window.location.href,
                    '?hello&query=' + encodeURIComponent($('#query').val()),
                    function (data, status) {
                 var id = data;
                 var text = '';
-                $('#seed').empty();
-                $('#result').html('<b>' + $('#query').val().replace(/\n/g, '<br />') + '</b>');
                 var tail = setInterval(function () {
                     $.post(window.location.href, '?hello&result=' + id, function (data, status) {
                         result = JSON.parse(data);
