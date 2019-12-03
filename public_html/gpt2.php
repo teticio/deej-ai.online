@@ -23,6 +23,7 @@
 
     if (isset($_POST['query'])) {
         $id = uniqid();
+        @file_put_contents("$ids_dir/$id.seed", $seed);
         $prompt = str_replace("'", "'\''", $_POST['query']);
         $command = "LANG=C.UTF-8 ../GPT2 $id --length=500 --seed=$seed --prompt='$prompt' > $ids_dir/$id &";
         shell_exec($command);
@@ -31,12 +32,15 @@
     } elseif (isset($_POST['result'])) {
         $text = file_get_contents("$ids_dir/" . $_POST['result']);
         $done = !file_exists(__DIR__ . "/$ids_dir/" . $_POST['result'] . '.lock');
+        $seed = file_get_contents("$ids_dir/" . $_POST['result'] . ".seed");
         print json_encode([
             'text' => $text,
-            'done' => $done
+            'done' => $done,
+            'seed' => $seed
         ]);
         if ($done) {
             unlink("$ids_dir/" . $_POST['result']);
+            unlink("$ids_dir/" . $_POST['result'] . '.seed');
         }
     } else {
 
@@ -77,6 +81,7 @@
                             var chunk = result['text'].substr(text.length);
                             text += chunk;
                             $('#result').html($('#result').html() + chunk.replace(/\n/g, '<br />'));
+                            $('#seed').html('&nbsp;(Seed = ' + result['seed'] + ')');
                         }
                         if (result['done']) {
                             clearInterval(tail);
@@ -102,7 +107,7 @@
             <br>
             <b>Generate random text with OpenAI's 1.5B parameter GPT-2 model</b>
             <textarea id="query" placeholder="Prompt" value="" rows="3" style="width: 100%;"></textarea>
-            <button id="generate" onclick="doQuery();">Generate</button>
+            <button id="generate" onclick="doQuery();">Generate</button><scan id="seed" style="font-size: 15px;"></scan>
         </div>
         <div>
             <scan id="result"></scan>
