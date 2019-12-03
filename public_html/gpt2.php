@@ -67,7 +67,7 @@
                    function (data, status) {
                 var id = data;
                 var text = '';
-                $('#result').html('<b>' + $('#query').val() + '</b>');
+                $('#result').html('<b>' + $('#query').val().replace(/\n/g, '<br />') + '</b>');
                 var tail = setInterval(function () {
                     $.post(window.location.href, '?hello&result=' + id, function (data, status) {
                         result = JSON.parse(data);
