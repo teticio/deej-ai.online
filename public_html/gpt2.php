@@ -71,6 +71,7 @@
                    function (data, status) {
                 var id = data;
                 var text = '';
+                $('#seed').empty();
                 $('#result').html('<b>' + $('#query').val().replace(/\n/g, '<br />') + '</b>');
                 var tail = setInterval(function () {
                     $.post(window.location.href, '?hello&result=' + id, function (data, status) {
