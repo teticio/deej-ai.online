@@ -62,7 +62,9 @@
                 $('#query').val(' ');
             }
             $('#generate').prop('disabled', true).html('Please wait...');
-            $.post(window.location.href, '?hello&query=' + $('#query').val(), function (data, status) {
+            $.post(window.location.href,
+                   '?hello&query=' + encodeURIComponent($('#query').val()),
+                   function (data, status) {
                 var id = data;
                 var text = '';
                 $('#result').html('<b>' + $('#query').val() + '</b>');
