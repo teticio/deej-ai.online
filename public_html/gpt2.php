@@ -82,7 +82,7 @@
                         } else if (result['text'] != '') {
                             var chunk = result['text'].substr(text.length);
                             text += chunk;
-                            $('#result').append('<span id="word" style="animation: fadein 1s;">' +
+                            $('#result').append('<span style="animation: fadein 1s;">' +
                                                 chunk.replace(/\n/g, '<br />') + '</span>');
                             $('#seed').html('&nbsp;(Seed = ' + result['seed'] + ')');
                         }
