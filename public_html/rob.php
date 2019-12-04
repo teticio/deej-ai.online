@@ -282,7 +282,7 @@
                         });
                     } else {
                         track_info = JSON.parse(data);
-                        try { window.localStorage.track_info = data; } catch(e) { ; }
+                        try { window.localStorage.rob_track_info = data; } catch(e) { ; }
                         cb();
                     }
                 });
@@ -290,7 +290,7 @@
         }
 
         function setTrack(play = false) {
-            $.post(window.location.href, 'hello&action=info&file=' + encodeURIComponent(track_info[0]), function (data, status) {
+            $.post(window.location.href, 'action=info&file=' + encodeURIComponent(track_info[0]), function (data, status) {
                 info = JSON.parse(data);
                 $('#album-art').html(info[0]);
                 $('#track').html(info[1]);
@@ -298,13 +298,13 @@
                 $(document).prop('title', info[2] + ' - ' + info[1]);
             });
             $('#mp3').attr('autoplay', play);
-            $('#mp3').attr('src', 'play.php?hello&file=' + encodeURIComponent(track_info[0]));
+            $('#mp3').attr('src', 'play.php?<?=trim($password);?>&file=' + encodeURIComponent(track_info[0]));
             $('#mp3')[0].load();
             if (play) {
                 $('#mp3')[0].play();
             }
             // preload next track
-            $('#next-mp3').attr('src', 'play.php?hello&file=' + encodeURIComponent(track_info[1]));
+            $('#next-mp3').attr('src', 'play.php?<?=trim($password);?>&file=' + encodeURIComponent(track_info[1]));
             $('#next-mp3')[0].load();
         }
 

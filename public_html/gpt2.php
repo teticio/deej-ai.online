@@ -70,12 +70,12 @@
             $('#generate').prop('disabled', true).html('Please wait...');
             $('#result').html('<b>' + $('#query').val().replace(/\n/g, '<br />') + '</b>');
             $.post(window.location.href,
-                   '?hello&query=' + encodeURIComponent($('#query').val()),
+                   'query=' + encodeURIComponent($('#query').val()),
                    function (data, status) {
                 var id = data;
                 var text = '';
                 var tail = setInterval(function () {
-                    $.post(window.location.href, '?hello&result=' + id, function (data, status) {
+                    $.post(window.location.href, 'result=' + id, function (data, status) {
                         result = JSON.parse(data);
                         if (result['text'] == 'Please try again when I am less busy...\n') {
                             $('#result').html(result['text']);
