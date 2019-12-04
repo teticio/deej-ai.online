@@ -76,7 +76,7 @@
         function escapeHtml(string) {
             return String(string).replace(/[&<>"'`=\/]/g, function (s) {
                 return entityMap[s];
-            }).replace(/ /g, '&nbsp;').replace(/\n/g, '<br />');
+            }).replace(/ /gm, '&nbsp;<wbr>').replace(/\n/g, '<br />');
         }
 
         function doQuery() {
