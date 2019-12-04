@@ -82,7 +82,8 @@
                         } else if (result['text'] != '') {
                             var chunk = result['text'].substr(text.length);
                             text += chunk;
-                            $('#result').html($('#result').html() + chunk.replace(/\n/g, '<br />'));
+                            $('#result').append('<span id="word" style="animation: fadein 1s;">' +
+                                                chunk.replace(/\n/g, '<br />') + '</span>');
                             $('#seed').html('&nbsp;(Seed = ' + result['seed'] + ')');
                         }
                         if (result['done']) {
@@ -100,6 +101,11 @@
             font-family: 'Helvetica', 'Arial', sans-serif;
             font-size: 20px;
         }
+
+        @keyframes fadein {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
     </style>
 </head>
 
@@ -111,8 +117,7 @@
             <textarea id="query" placeholder="Prompt" value="" rows="3" style="width: 100%;"></textarea>
             <button id="generate" onclick="doQuery();">Generate</button><scan id="seed" style="font-size: 15px;"></scan>
         </div>
-        <div>
-            <scan id="result"></scan>
+        <div id="result">
         </div>
     </div>
 </body>
