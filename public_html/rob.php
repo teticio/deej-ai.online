@@ -1,5 +1,6 @@
 <?php
-    if (!isset($_GET['hello'])) {
+    $password = file_get_contents("../password");
+    if (!isset($_GET[trim($password)])) {
         include('404.html');
         die();
     }
