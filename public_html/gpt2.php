@@ -62,13 +62,30 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
     <script>
+        var entityMap = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+            '/': '&#x2F;',
+            '`': '&#x60;',
+            '=': '&#x3D;'
+        };
+
+        function escapeHtml(string) {
+            return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+                return entityMap[s];
+            }).replace(/ /g, '&nbsp;').replace(/\n/g, '<br />');
+        }
+
         function doQuery() {
             if ($('#query').val() == '') {
                 $('#query').val(' ');
             }
             $('#seed').empty();
             $('#generate').prop('disabled', true).html('Please wait...');
-            $('#result').html('<b>' + $('#query').val().replace(/\n/g, '<br />') + '</b>');
+            $('#result').html('<b>' + escapeHtml($('#query').val()) + '</b>');
             $.post(window.location.href,
                    'query=' + encodeURIComponent($('#query').val()),
                    function (data, status) {
@@ -83,7 +100,7 @@
                             var chunk = result['text'].substr(text.length);
                             text += chunk;
                             $('#result').append('<span style="animation: fadein 1s;">' +
-                                                chunk.replace(/\n/g, '<br />') + '</span>');
+                                escapeHtml(chunk) + '</span>');
                             $('#seed').html('&nbsp;(Seed = ' + result['seed'] + ')');
                         }
                         if (result['done']) {
