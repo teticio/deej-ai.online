@@ -11,6 +11,12 @@
         $seed = mt_rand();
     }
 
+    if (isset($_GET['temperature'])) {
+        $temperature = $_GET['temperature'];
+    } else {
+        $temperature = 1.0;
+    }
+
     // directory to store active sessions
     $ids_dir = '../gpt2';
 
@@ -26,7 +32,7 @@
         $id = uniqid();
         @file_put_contents("$ids_dir/$id.seed", $seed);
         $prompt = str_replace("'", "'\''", $_POST['query']);
-        $command = "LANG=C.UTF-8 ../GPT2 $id --length=500 --seed=$seed --prompt='$prompt' > $ids_dir/$id &";
+        $command = "LANG=C.UTF-8 ../GPT2 $id --length=500 --seed=$seed --prompt='$prompt' --temperature='$temperature' > $ids_dir/$id &";
         shell_exec($command);
         print $id;
 
