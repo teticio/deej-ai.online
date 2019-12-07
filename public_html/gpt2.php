@@ -37,17 +37,17 @@
         print $id;
 
     } elseif (isset($_POST['result'])) {
-        $text = file_get_contents("$ids_dir/" . $_POST['result']);
-        $done = !file_exists(__DIR__ . "/$ids_dir/" . $_POST['result'] . '.lock');
-        $seed = file_get_contents("$ids_dir/" . $_POST['result'] . ".seed");
+        $text = file_get_contents("$ids_dir/{$_POST['result']}");
+        $done = !file_exists(__DIR__ . "/$ids_dir/{$_POST['result']}.lock");
+        $seed = file_get_contents("$ids_dir/{$_POST['result']}.seed");
         print json_encode([
             'text' => $text,
             'done' => $done,
             'seed' => $seed
         ]);
         if ($done) {
-            unlink("$ids_dir/" . $_POST['result']);
-            unlink("$ids_dir/" . $_POST['result'] . '.seed');
+            unlink("$ids_dir/{$_POST['result']}");
+            unlink("$ids_dir/{$_POST['result']}.seed");
         }
     } else {
 
