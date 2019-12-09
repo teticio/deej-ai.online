@@ -1,9 +1,10 @@
 <?php
     require '../vendor/autoload.php';
 
+    $credentials = json_decode(file_get_contents("../credentials"));
     $session = new SpotifyWebAPI\Session(
-        '1a7897e3c69d4684aa4d8e90d5911594',
-        'c60a83ca283449afb39e63841a1af60d',
+        $credentials->{'spotify_client_id'},
+        $credentials->{'spotify_client_secret'},
         $_SERVER['SCRIPT_URI']
     );
 
