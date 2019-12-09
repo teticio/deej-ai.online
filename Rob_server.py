@@ -10,6 +10,7 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 import sys
 import uuid
+import json
 import pickle
 import random
 import logging
@@ -30,8 +31,10 @@ from utils import download_file_from_google_drive
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
 
-client_id = '1a7897e3c69d4684aa4d8e90d5911594'
-client_secret = 'c60a83ca283449afb39e63841a1af60d'
+with open('credentials') as file:
+    credentials = json.loads(file.read())
+client_id = credentials['spotify_client_id']
+client_secret = credentials['spotify_client_secret']
 
 epsilon_distance = 0.001
 lookback = 3
