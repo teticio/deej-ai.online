@@ -42,56 +42,43 @@ def most_similar(mp3tovecs,
                  negative=[],
                  noise=0,
                  vecs=None):
-    if isinstance(positive, str):
-        positive = [positive]  # broadcast to list
-    if isinstance(negative, str):
-        negative = [negative]  # broadcast to list
-    similar = np.zeros((len(mp3tovecs[0]), 2, len(weights)), dtype=np.float64)
-    for k, mp3tovec in enumerate(mp3tovecs):
-        mp3_vec_i = np.sum([mp3tovec[i] for i in positive] +
-                           [-mp3tovec[i] for i in negative],
-                           axis=0)
-        mp3_vec_i += np.random.normal(0, noise, len(mp3_vec_i))
-        if vecs is not None:
-            mp3_vec_i += np.sum(vecs, axis=0)
-        mp3_vec_i = mp3_vec_i / np.linalg.norm(mp3_vec_i)
-        for j, track_j in enumerate(mp3tovec):
-            if track_j in positive or track_j in negative:
-                continue
-            mp3_vec_j = mp3tovec[track_j]
-            similar[j, 0, k] = j
-            similar[j, 1, k] = np.dot(mp3_vec_i, mp3_vec_j)
-    return sorted(similar, key=lambda x: -np.dot(x[1], weights))
+    mp3_vecs_i = np.array([weights[j] *
+        np.sum([mp3tovecs[i, j] for i in positive] +
+               [-mp3tovecs[i, j] for i in negative],
+               axis=0) for j in range(len(weights))])
+    if vecs is not None:
+        mp3_vecs_i += np.sum(vecs, axis=0)
+    if noise != 0:
+        for i, mp3_vec_i in enumerate(mp3_vecs_i):
+            mp3_vec_i += weights[i] * np.random.normal(0, noise, mp3tovecs.shape[2])
+    result = list(
+        np.argsort(np.tensordot(mp3tovecs, mp3_vecs_i, axes=((1, 2), (0, 1)))))
+    for i in negative:
+        del result[result.index(i)]
+    result.reverse()
+    for i in positive:
+        del result[result.index(i)]
+    return result
 
 
 def most_similar_by_vec(mp3tovecs,
                         weights,
-                        positives=None,
-                        negatives=None,
+                        positives=[],
+                        negatives=[],
                         noise=0):
-    similar = np.zeros((len(mp3tovecs[0]), 2, len(weights)), dtype=np.float64)
-    positive = negative = []
-    for k, mp3tovec in enumerate(mp3tovecs):
-        if positives is not None:
-            positive = positives[k]
-        if negatives is not None:
-            negative = negatives[k]
-        if isinstance(positive, str):
-            positive = [positive]  # broadcast to list
-        if isinstance(negative, str):
-            negative = [negative]  # broadcast to list
-        mp3_vec_i = np.sum([i for i in positive] + [-i for i in negative],
-                           axis=0)
-        mp3_vec_i += np.random.normal(0, noise, len(mp3_vec_i))
-        mp3_vec_i = mp3_vec_i / np.linalg.norm(mp3_vec_i)
-        for j, track_j in enumerate(mp3tovec):
-            mp3_vec_j = mp3tovec[track_j]
-            similar[j, 0, k] = j
-            similar[j, 1, k] = np.dot(mp3_vec_i, mp3_vec_j)
-    return sorted(similar, key=lambda x: -np.dot(x[1], weights))
+    mp3_vecs_i = np.array([weights[j] *
+        np.sum(positives[j] if positives else [] +
+               -negatives[j] if negatives else [],
+               axis=0) for j in range(len(weights))])
+    if noise != 0:
+        for i, mp3_vec_i in enumerate(mp3_vecs_i):
+            mp3_vec_i += weights[i] * np.random.normal(0, noise, mp3tovecs.shape[2])
+    result = list(
+        np.argsort(-np.tensordot(mp3tovecs, mp3_vecs_i, axes=((1, 2), (0, 1)))))
+    return result
 
 
-def get_similar_vec(track_url, model, graph, mp3tovec, track_ids):
+def get_similar_vec(track_url, model, graph):
     playlist_id = str(uuid.uuid4())
     sr = 22050
     n_fft = 2048
@@ -116,16 +103,14 @@ def get_similar_vec(track_url, model, graph, mp3tovec, track_ids):
                                            n_mels=n_mels,
                                            fmax=sr / 2)
         # hack because Spotify samples are a shade under 30s
-        x = np.ndarray(shape=(S.shape[1] // slice_size + 1, n_mels, slice_size,
-                              1),
+        x = np.ndarray(shape=(S.shape[1] // slice_size + 1, n_mels, slice_size, 1),
                        dtype=float)
         for slice in range(S.shape[1] // slice_size):
             log_S = librosa.power_to_db(S[:, slice * slice_size:(slice + 1) *
                                           slice_size],
                                         ref=np.max)
             if np.max(log_S) - np.min(log_S) != 0:
-                log_S = (log_S - np.min(log_S)) / (np.max(log_S) -
-                                                   np.min(log_S))
+                log_S = (log_S - np.min(log_S)) / (np.max(log_S) - np.min(log_S))
             x[slice, :, :, 0] = log_S
         # hack because Spotify samples are a shade under 30s
         log_S = librosa.power_to_db(S[:, -slice_size:], ref=np.max)

@@ -19,6 +19,7 @@ mutagen = "*"
 pillow = "*"
 pandas = "*"
 ipykernel = "*"
+yapf = "*"
 
 [requires]
 python_version = "3.6"

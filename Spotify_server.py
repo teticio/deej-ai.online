@@ -42,8 +42,7 @@ def add_track_to_playlist(sp, username, playlist_id, track_id, replace=False):
     if sp is not None and username is not None and playlist_id is not None:
         try:
             if replace:
-                sp.user_playlist_replace_tracks(username, playlist_id,
-                                                [track_id])
+                sp.user_playlist_replace_tracks(username, playlist_id, [track_id])
             else:
                 sp.user_playlist_add_tracks(username, playlist_id, [track_id])
         except spotipy.client.SpotifyException:
@@ -52,38 +51,36 @@ def add_track_to_playlist(sp, username, playlist_id, track_id, replace=False):
 
 # create a musical journey between given track "waypoints"
 def join_the_dots(client_id, sp, username, playlist_id, mp3tovecs, weights, ids, \
-                  tracks, track_ids, n=5, noise=0, replace=True):
+                  tracks, track_ids, track_indices, n=5, noise=0, replace=True):
     if playlist_id:
         yield 'playlist_id:' + playlist_id + ' '
     playlist = []
     playlist_tracks = [tracks[_] for _ in ids]
     end = start = ids[0]
-    start_vec = [mp3tovec[start] for k, mp3tovec in enumerate(mp3tovecs)]
+    start_vec = mp3tovecs[track_indices[start]]
     for end in ids[1:]:
-        end_vec = [mp3tovec[end] for k, mp3tovec in enumerate(mp3tovecs)]
+        end_vec = mp3tovecs[track_indices[end]]
         playlist.append(start)
         add_track_to_playlist(sp, username, playlist_id, playlist[-1], replace
                               and len(playlist) == 1)
         app.logger.info(f'{len(playlist)}.* {tracks[playlist[-1]]}')
         yield playlist[-1] + ' '
         for i in range(n):
-            if (client_id
-                    and not os.path.exists('./spotify_ids/' + client_id)):
+            if (client_id and not os.path.exists('./spotify_ids/' + client_id)):
                 # the user has gone away
                 break
             candidates = most_similar_by_vec(mp3tovecs,
                                              weights,
                                              [[(n - i + 1) / n * start_vec[k] +
                                                (i + 1) / n * end_vec[k]]
-                                              for k in range(len(mp3tovecs))],
+                                              for k in range(len(weights))],
                                              noise=noise)
             for candidate in candidates:
-                track_id = track_ids[int(candidate[0][0])]
+                track_id = track_ids[candidate]
                 if track_id not in playlist + ids and tracks[
                         track_id] not in playlist_tracks and tracks[
                             track_id][:tracks[track_id].find(' - ')] != tracks[
-                                playlist[-1]][:tracks[playlist[-1]].find(' - '
-                                                                         )]:
+                                playlist[-1]][:tracks[playlist[-1]].find(' - ')]:
                     break
             playlist.append(track_id)
             playlist_tracks.append(tracks[track_id])
@@ -98,27 +95,27 @@ def join_the_dots(client_id, sp, username, playlist_id, mp3tovecs, weights, ids,
     yield playlist[-1] + ' '
 
 
-def make_playlist(client_id, sp, username, playlist_id, mp3tovecs, weights, seed_tracks, \
-                  tracks, track_ids, size=10, lookback=3, noise=0, replace=True):
+def make_playlist(client_id, sp, username, playlist_id, mp3tovecs, weights, playlist, \
+                  tracks, track_ids, track_indices, size=10, lookback=3, noise=0, replace=True):
     if playlist_id:
         yield 'playlist_id:' + playlist_id + ' '
-    playlist = seed_tracks
     playlist_tracks = [tracks[_] for _ in playlist]
-    for i in range(0, len(seed_tracks)):
+    playlist_indices = [track_indices[_] for _ in playlist]
+    for i in range(0, len(playlist)):
         add_track_to_playlist(sp, username, playlist_id, playlist[i], replace
                               and len(playlist) == 1)
-        app.logger.info(f'{i+1}.* {tracks[seed_tracks[i]]}')
-        yield seed_tracks[i] + ' '
-    for i in range(len(seed_tracks), size):
+        app.logger.info(f'{i+1}.* {tracks[playlist[i]]}')
+        yield playlist[i] + ' '
+    for i in range(len(playlist), size):
         if (client_id and not os.path.exists('./spotify_ids/' + client_id)):
             # the user has gone away
             break
         candidates = most_similar(mp3tovecs,
                                   weights,
-                                  positive=playlist[-lookback:],
+                                  positive=playlist_indices[-lookback:],
                                   noise=noise)
         for candidate in candidates:
-            track_id = track_ids[int(candidate[0][0])]
+            track_id = track_ids[candidate]
             if track_id not in playlist and tracks[
                     track_id] not in playlist_tracks and tracks[
                         track_id][:tracks[track_id].find(' - ')] != tracks[
@@ -126,6 +123,7 @@ def make_playlist(client_id, sp, username, playlist_id, mp3tovecs, weights, seed
                 break
         playlist.append(track_id)
         playlist_tracks.append(tracks[track_id])
+        playlist_indices.append(candidate)
         add_track_to_playlist(sp, username, playlist_id, playlist[-1])
         app.logger.info(f'{i+1}. {tracks[playlist[-1]]}')
         yield playlist[-1] + ' '
@@ -163,7 +161,7 @@ def post():
         search_string = re.sub(r'([^\s\w]|_)+', '',
                                content['search_string'].lower()).split()
         ids = sorted([
-            track for track in mp3tovecs
+            track for track in tracks
             if all(word in re.sub(r'([^\s\w]|_)+', '', tracks[track].lower())
                    for word in search_string)
         ],
@@ -175,12 +173,12 @@ def post():
 
     if 'track_url' in content:
         track_url = content.get('track_url', None)
-        vecs = get_similar_vec(track_url, model, graph, mp3tovecs, track_ids)
+        vecs = get_similar_vec(track_url, model, graph)
         if vecs is not None:
             # vector seed
-            candidates = most_similar_by_vec([mp3tovecs], [1], [vecs])
+            candidates = most_similar_by_vec(mp3tovecs[:, np.newaxis, 0, :], [1], [vecs])
             ids = [
-                track_ids[int(candidate[0][0])]
+                track_ids[candidate]
                 for candidate in candidates[0:10]
             ]
             response = [{'track': tracks[id], 'id': id} for id in ids]
@@ -230,18 +228,19 @@ def post():
         client_id = content.get('client_id', None)
 
         if len(input_tracks) == 0:
-            ids = [track for track in mp3tovecs]
-            input_tracks.append(ids[random.randint(0, len(ids))])
+            input_tracks = [random.choice(track_ids)]
 
         if len(input_tracks) > 1:
             track_id = join_the_dots(client_id,
                                      sp,
                                      username,
-                                     playlist_id, [mp3tovecs, tracktovecs],
+                                     playlist_id,
+                                     mp3tovecs,
                                      [creativity, 1 - creativity],
                                      input_tracks,
                                      tracks,
                                      track_ids,
+                                     track_indices,
                                      n=size,
                                      noise=noise,
                                      replace=replace)
@@ -249,11 +248,13 @@ def post():
             track_id = make_playlist(client_id,
                                      sp,
                                      username,
-                                     playlist_id, [mp3tovecs, tracktovecs],
+                                     playlist_id,
+                                     mp3tovecs,
                                      [creativity, 1 - creativity],
                                      input_tracks,
                                      tracks,
                                      track_ids,
+                                     track_indices,
                                      size=size,
                                      lookback=lookback,
                                      noise=noise,
@@ -287,6 +288,10 @@ if __name__ == '__main__':
 
     tracks = pickle.load(open('spotify_tracks.p', 'rb'))
     track_ids = [_ for _ in mp3tovecs]
+
+    track_indices = dict(map(lambda x: (x[1], x[0]), enumerate(mp3tovecs)))
+    mp3tovecs = np.array([[mp3tovecs[_], tracktovecs[_]] for _ in mp3tovecs])
+    del tracktovecs
 
     model = load_model('speccy_model')
     model._make_predict_function()

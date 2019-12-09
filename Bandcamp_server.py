@@ -43,14 +43,17 @@ client_playlists = {}
 def make_bandcamp_playlist(urltovec,
                            seed_tracks,
                            track_ids,
+                           track_indices,
                            tracks,
                            lookback=3,
                            noise=0,
                            vecs=None):
     if vecs is not None:
         # vector seed
-        candidates = most_similar_by_vec([urltovec], [1], [vecs])
-        playlist = [track_ids[int(candidates[0][0][0])]]
+        candidates = most_similar_by_vec(urltovec, [1], [vecs])
+        vecs = vecs[:, np.newaxis, :]
+        playlist = [track_ids[candidates[0]]]
+        playlist_indices = [candidates[0]]
         app.logger.info(f'{len(playlist)}. {tracks[playlist[-1]]}')
         if len(playlist) > 1:
             yield [playlist[-2], playlist[-1]]
@@ -58,6 +61,7 @@ def make_bandcamp_playlist(urltovec,
     else:
         # track seed
         playlist = seed_tracks
+        playlist_indices = [track_indices[_] for _ in playlist]
         for i in range(0, len(seed_tracks)):
             app.logger.info(f'{i+1}. {tracks[seed_tracks[i]]}')
             if (i > 1):
@@ -66,15 +70,16 @@ def make_bandcamp_playlist(urltovec,
     while True:
         if len(playlist) > lookback:
             vecs = None
-        candidates = most_similar([urltovec], [1],
-                                  positive=playlist[-lookback:],
+        candidates = most_similar(urltovec, [1],
+                                  positive=playlist_indices[-lookback:],
                                   noise=noise,
                                   vecs=vecs)
         for candidate in candidates:
-            track_id = track_ids[int(candidate[0][0])]
+            track_id = track_ids[candidate]
             if track_id not in playlist:
                 break
         playlist.append(track_id)
+        playlist_indices.append(candidate)
         app.logger.info(f'{len(playlist)}. {tracks[playlist[-1]]}')
         if len(playlist) > 1:
             yield [playlist[-2], playlist[-1]]
@@ -158,11 +163,12 @@ def post():
         client_id = content.get('client_id', None)
         bandcamp_url = content['bandcamp_url']
         if bandcamp_url == '':
-            bandcamp_url = random.choice(list(urltovec.keys()))
+            bandcamp_url = random.choice(track_ids)
         playlist_id = str(uuid.uuid4())
         playlist_cache[playlist_id] = make_bandcamp_playlist(urltovec,
                                                              [bandcamp_url],
                                                              track_ids,
+                                                             track_indices,
                                                              tracks,
                                                              lookback=lookback,
                                                              noise=noise)
@@ -189,13 +195,14 @@ def post():
     elif 'spotify_url' in content:
         client_id = content.get('client_id', None)
         spotify_url = content['spotify_url']
-        vecs = get_similar_vec(spotify_url, model, graph, urltovec, track_ids)
+        vecs = get_similar_vec(spotify_url, model, graph)
         if vecs is not None:
             playlist_id = str(uuid.uuid4())
             playlist_cache[playlist_id] = make_bandcamp_playlist(
                 urltovec,
                 None,
                 track_ids,
+                track_indices,
                 tracks,
                 lookback=lookback,
                 noise=noise,
@@ -208,7 +215,7 @@ def post():
         remove_client(client_id)
 
     elif 'num_tracks' in content:
-        response = str(len(urltovec))
+        response = str(urltovec.shape[0])
 
     return response
 
@@ -228,6 +235,8 @@ if __name__ == '__main__':
                 urltovec)))
     tracks = pickle.load(open('bandcamp_tracks.p', 'rb'))
     track_ids = list(urltovec.keys())
+    track_indices = dict(map(lambda x: (x[1], x[0]), enumerate(urltovec)))
+    urltovec = np.array([[urltovec[_]] for _ in urltovec])
 
     model = load_model('speccy_model')
     model._make_predict_function()

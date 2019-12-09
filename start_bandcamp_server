@@ -1,4 +1,4 @@
 #!/bin/bash
-. activate
+source activate
 python Bandcamp_server.py $1 &>> server.log
 

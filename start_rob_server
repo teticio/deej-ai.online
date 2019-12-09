@@ -1,4 +1,4 @@
 #!/bin/bash
-. activate
+source activate
 python Rob_server.py $1 &>> server.log
 
