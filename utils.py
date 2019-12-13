@@ -49,10 +49,9 @@ def most_similar(mp3tovecs,
     if vecs is not None:
         mp3_vecs_i += np.sum(vecs, axis=0)
     if noise != 0:
-        for i, mp3_vec_i in enumerate(mp3_vecs_i):
+        for mp3_vec_i in mp3_vecs_i:
             mp3_vec_i += np.random.normal(0, noise * np.linalg.norm(mp3_vec_i), mp3tovecs.shape[2])
-    result = list(
-        np.argsort(np.tensordot(mp3tovecs, mp3_vecs_i, axes=((1, 2), (0, 1)))))
+    result = list(np.argsort(np.tensordot(mp3tovecs, mp3_vecs_i, axes=((1, 2), (0, 1)))))
     for i in negative:
         del result[result.index(i)]
     result.reverse()
@@ -71,10 +70,9 @@ def most_similar_by_vec(mp3tovecs,
                -negatives[j] if negatives else [],
                axis=0) for j in range(len(weights))])
     if noise != 0:
-        for i, mp3_vec_i in enumerate(mp3_vecs_i):
-            mp3_vec_i += weights[i] * np.random.normal(0, noise, mp3tovecs.shape[2])
-    result = list(
-        np.argsort(-np.tensordot(mp3tovecs, mp3_vecs_i, axes=((1, 2), (0, 1)))))
+        for mp3_vec_i in mp3_vecs_i:
+            mp3_vec_i += np.random.normal(0, noise * np.linalg.norm(mp3_vec_i), mp3tovecs.shape[2])
+    result = list(np.argsort(-np.tensordot(mp3tovecs, mp3_vecs_i, axes=((1, 2), (0, 1)))))
     return result
 
 
