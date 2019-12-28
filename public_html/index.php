@@ -336,7 +336,8 @@
         }
             
         function addTracks() {
-            if ($('#tracks > option').length < 6 && $('#search_results').prop('selectedIndex') != 0) {
+            if ($('#tracks > option').length < 6 && $('#search_results').prop('selectedIndex') != 0 &&
+                $('#search_results').val() != null) {
                 $('#tracks').append(new Option($('#search_results option:selected').text(), $('#search_results').val()));
                 $('#search_results option:selected').prop('selected', false);
                 $('#search_results eq:0').prop('selected', true);
