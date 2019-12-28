@@ -540,14 +540,14 @@
             <div class="row align-items-center">
                 <div class="col-sm-6">
                     <label for="search_results"><span id="num_found">Search results</span></label>
-                    <select class="form-control" size="4" style="overflow-x: scroll" oninput="addTracks();"
+                    <select class="form-control" size="4" style="overflow-x: scroll" onchange="addTracks();"
                         id="search_results">
                         <option value="" disabled selected></option>
                     </select>
                 </div>
                 <div class="col-sm-6">
                     <label for="tracks">Added <span id="num_added">tracks</span></label>
-                    <select class="form-control" size="4" style="overflow-x: scroll" oninput="removeTracks();"
+                    <select class="form-control" size="4" style="overflow-x: scroll" onchange="removeTracks();"
                         id="tracks">
                         <option value="" disabled selected></option>
                     </select>
