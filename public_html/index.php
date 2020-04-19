@@ -234,11 +234,11 @@
                 }
             });
 
-            $('#creativity_slider').on('input', function () {
+            $('#creativity_slider').on('input change', function () {
                 $('#creativity').html(this.value);
             });
 
-            $('#noise_slider').on('input', function () {
+            $('#noise_slider').on('input change', function () {
                 $('#noise').html(this.value);
             });
 
