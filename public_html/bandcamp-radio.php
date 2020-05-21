@@ -6,7 +6,7 @@
     if (is_resource($connection)) {
         fclose($connection);
     } else {
-        $output = exec('(cd ..; ./start_bandcamp_server ' . $port . ' > /dev/null 2> /dev/null &)');
+        $output = exec('(cd ..; NUMBA_CACHE_DIR=/tmp ./start_bandcamp_server ' . $port . ' > /dev/null 2> /dev/null &)');
         sleep(10);
     }
     $curlopts = [
