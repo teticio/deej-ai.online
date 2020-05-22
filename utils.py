@@ -119,7 +119,8 @@ def get_similar_vec(track_url, model, graph):
             vecs = model.predict(x)
         return vecs
 
-    except:
+    except Exception as e:
+        print(e)
         if os.path.exists(f'./{playlist_id}.mp3'):
             os.remove(f'./{playlist_id}.mp3')
         return None
