@@ -5,7 +5,7 @@
     $session = new SpotifyWebAPI\Session(
         $credentials->{'spotify_client_id'},
         $credentials->{'spotify_client_secret'},
-        $_SERVER['SCRIPT_URI']
+        $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/'
     );
 
     $api = new SpotifyWebAPI\SpotifyWebAPI();
