@@ -7,7 +7,7 @@
         fclose($connection);
     } else {
         $output = exec('(cd ..; NUMBA_CACHE_DIR=/tmp ./start_bandcamp_server ' . $port . ' > /dev/null 2> /dev/null &)');
-        sleep(10);
+        sleep(20);
     }
     $curlopts = [
         CURLOPT_RETURNTRANSFER => true,
