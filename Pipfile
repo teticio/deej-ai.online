@@ -20,6 +20,8 @@ pillow = "*"
 pandas = "*"
 ipykernel = "*"
 yapf = "*"
+tensorflow-gpu = "==1.14"
+numba = "==0.48"
 
 [requires]
 python_version = "3.6"
