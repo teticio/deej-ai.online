@@ -227,6 +227,19 @@
         var id = null;
         var preview_url = null;
 
+        function iOS() {
+            return [
+                'iPad Simulator',
+                'iPhone Simulator',
+                'iPod Simulator',
+                'iPad',
+                'iPhone',
+                'iPod'
+            ].includes(navigator.platform)
+            // iPad on iOS 13 detection
+            || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+        }
+        
         $(document).ready(function () {
             $(window).on('unload', function () {
                 if (id) {
@@ -234,6 +247,10 @@
                 }
             });
 
+            if (!iOS()) {
+                $('#google_play').show();
+            }
+            
             $('#creativity_slider').on('input change', function () {
                 $('#creativity').html(this.value);
             });
@@ -614,7 +631,7 @@
                     your choosing. Keep checking back as I am constantly adding new tracks to the database.</h5>
                 <div class="row align-items-center">
                     <div class="col">
-                        <div class="text-center">
+                        <div class="text-center" id="google_play" style="display: none;">
                             <a href='https://play.google.com/store/apps/details?id=online.deejai.www&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'
                                 target="_blank"><img alt='Get it on Google Play'
                                     src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'
