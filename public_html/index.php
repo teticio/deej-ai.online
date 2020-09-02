@@ -240,6 +240,10 @@
             || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
         }
         
+        function Android() {
+            return /Android/i.test(navigator.userAgent);
+        }
+        
         $(document).ready(function () {
             $(window).on('unload', function () {
                 if (id) {
@@ -247,8 +251,11 @@
                 }
             });
 
-            if (!iOS()) {
-                $('#google_play').show();
+            if (iOS()) {
+                $('#google_play').hide();
+            }
+            if (Android()) {
+                $('#itunes').hide();                
             }
             
             $('#creativity_slider').on('input change', function () {
@@ -630,12 +637,17 @@
                         radio</a> creates playlists on the fly based on a random Bandcamp track or a Spotify track of
                     your choosing. Keep checking back as I am constantly adding new tracks to the database.</h5>
                 <div class="row align-items-center">
-                    <div class="col">
-                        <div class="text-center" id="google_play" style="display: none;">
+                    <div class="col" id="google_play">
+                        <div class="text-center">
                             <a href='https://play.google.com/store/apps/details?id=online.deejai.www&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'
                                 target="_blank"><img alt='Get it on Google Play'
                                     src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'
                                     width="150px" /></a>
+                        </div>
+                    </div>
+                    <div class="col" id="itunes">
+                        <div class="text-center">
+                            <a href="https://apps.apple.com/us/app/deej-a-i/id1529860910?mt=8" style="display:inline-block;overflow:hidden;background:url(https://linkmaker.itunes.apple.com/en-us/badge-lrg.svg?releaseDate=2020-09-01&kind=iossoftware&bubble=apple_music) no-repeat;width:135px;height:40px;"></a>
                         </div>
                     </div>
                 </div>
