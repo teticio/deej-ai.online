@@ -199,7 +199,7 @@
 <head>
     <title>Deej-A.I. - Automatically generate playlists based on how the music sounds</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     <!--Favicons-->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
