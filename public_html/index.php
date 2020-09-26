@@ -188,15 +188,6 @@
 <html lang='en'>
 
 <head>
-    <script src='//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
-</head>
-
-<body>
-<!doctype html>
-<html lang="en">
-<html>
-
-<head>
     <title>Deej-A.I. - Automatically generate playlists based on how the music sounds</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
