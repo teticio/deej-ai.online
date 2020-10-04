@@ -1,6 +1,7 @@
 {
     "require": {
         "jwilsson/spotify-web-api-php": "^2.12",
-        "james-heinrich/getid3": "^1.9"
+        "james-heinrich/getid3": "^1.9",
+        "aws/aws-sdk-php": "^3.156"
     }
 }

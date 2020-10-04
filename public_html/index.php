@@ -173,11 +173,14 @@
                 break;
 
             case 'current':
-                print json_encode([
-                    $api->getMyCurrentTrack()->item->preview_url,
-                    $api->getMyCurrentTrack()->item->artists[0]->name,
-                    $api->getMyCurrentTrack()->item->name
-                ]);
+                $item = $api->getMyCurrentTrack()->item;
+                if ($item) {
+                    print json_encode([
+                        $item->preview_url,
+                        $item->artists[0]->name,
+                        $item->name
+                    ]);
+                }
                 break;
         }
     } else {
