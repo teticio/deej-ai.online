@@ -88,12 +88,13 @@ def get_similar_vec(track_url, model, graph):
         r = requests.get(track_url, allow_redirects=True)
         if r.status_code != 200:
             return []
-        with open(f'{playlist_id}.mp3',
+        extension = 'wav' if 'wav' in r.headers['Content-Type'] else 'mp3'
+        with open(f'{playlist_id}.{extension}',
                   'wb') as file:  # this is really annoying!
             shutil.copyfileobj(BytesIO(r.content), file, length=131072)
-        y, sr = librosa.load(f'{playlist_id}.mp3', mono=True)
+        y, sr = librosa.load(f'{playlist_id}.{extension}', mono=True)
         # cannot safely process two calls from same client
-        os.remove(f'{playlist_id}.mp3')
+        os.remove(f'{playlist_id}.{extension}')
         S = librosa.feature.melspectrogram(y=y,
                                            sr=sr,
                                            n_fft=n_fft,
