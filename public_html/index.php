@@ -173,13 +173,16 @@
                 break;
 
             case 'current':
-                $item = $api->getMyCurrentTrack()->item;
-                if ($item) {
-                    print json_encode([
-                        $item->preview_url,
-                        $item->artists[0]->name,
-                        $item->name
-                    ]);
+                $current_track = $api->getMyCurrentTrack();
+                if (isset($current_track->item)) {
+                    $item = $current_track->item;
+                    if ($item) {
+                        print json_encode([
+                            $item->preview_url,
+                            $item->artists[0]->name,
+                            $item->name
+                        ]);
+                    }
                 }
                 break;
         }

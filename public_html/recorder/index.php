@@ -53,6 +53,7 @@
         }
     }
     
+/* uses lambda functions sit sam-deejai project
     use Aws\S3\S3Client;
     use GuzzleHttp\Promise;
     
@@ -91,6 +92,67 @@
                 die();
             }
         die();
+    } */
+
+    if (isset($_FILES['audio_data']) && isset($_GET['token'])) {
+        $size = $_FILES['audio_data']['size']; //the size in bytes
+        $input = $_FILES['audio_data']['tmp_name']; //temporary name that PHP gave to the uploaded file
+        $output = uniqid() . '.wav';
+        move_uploaded_file($input, $output);
+
+        try {
+            $port = ($_SERVER['HTTP_HOST'] != 'localhost')? 5123: 5125;
+            $spotify_server = 'http://localhost:' . $port . '/spotify_server';
+            $curlopts = [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLINFO_HEADER_OUT => true,
+                CURLOPT_POST => true
+            ];
+
+            $postdata = [
+                'track_url' => $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/recorder/' . $output
+            ];
+            $payload = json_encode($postdata);
+            $ch = curl_init($spotify_server);
+            curl_setopt_array($ch, $curlopts);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($payload)
+            ]);
+            $result = curl_exec($ch);
+            curl_close($ch);
+
+            if ($result != '') {
+                $id = json_decode($result)[0]->id;
+                $postdata = [
+                    'access_token' => $session->getAccessToken(),
+                    'username' => $api->me()->id,
+                    'playlist' => 'Deej-A.I.',
+                    'tracks' => [$id],
+                    'replace' => '1',
+                    'size' => '20',
+                    'creativity' => '0.5',
+                    'noise' => '0'
+                ];
+                $payload = json_encode($postdata);
+                $ch = curl_init($spotify_server);
+                curl_setopt_array($ch, $curlopts);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    'Content-Type: application/json',
+                    'Content-Length: ' . strlen($payload)
+                ]);
+                $result = curl_exec($ch);
+                print(substr(explode(' ', $result)[0], 12));
+            }
+        } catch (Exception $e) {
+            print('');
+        } finally {
+            unlink($output);
+            @curl_close($ch);
+            die();
+        }
     }
 ?>
 
