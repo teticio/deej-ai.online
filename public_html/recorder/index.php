@@ -287,14 +287,17 @@
                     xhr.onload=function(e) {
                         if(this.readyState === 4) {
                             console.log("Server returned: ",e.target.responseText);
-                        }
-                        if (e.target.responseText) {
-                            var url = 'https://open.spotify.com/playlist/' + e.target.responseText;
+                            if (e.target.responseText == '') {
+                                $('#recordButton').on('click', startStopRecording);
+                                $('#recordButton').html('Try again');
+                            } else {
+                                var url = 'https://open.spotify.com/playlist/' + e.target.responseText;
 
-                            $('#recordButton').on('click', (function() {
-                                window.location.href=url;
-                            }));
-                            $('#recordButton').html('Open Spotify');
+                                $('#recordButton').on('click', (function() {
+                                    window.location.href=url;
+                                }));
+                                $('#recordButton').html('Open Spotify');
+                            }
                         }
                     };
                     var fd=new FormData();
