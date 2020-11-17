@@ -185,8 +185,8 @@ def post():
             info = []
             for url in urls:
                 html = str(requests.get(url).content)
-                mp3_url = html[html.find('{"mp3-128":"') + len('{"mp3-128":"'):]
-                mp3_url = mp3_url[:mp3_url.find('"}')]
+                mp3_url = html[html.find('{&quot;mp3-128&quot;:&quot;') + len('{&quot;mp3-128&quot;:&quot;'):]
+                mp3_url = mp3_url[:mp3_url.find('&quot;}')]
                 jpg_url = html[html.find('tralbumArt') + len('tralbumArt'):]
                 jpg_url = jpg_url[jpg_url.find('img src="') + len('img src="'):]
                 jpg_url = jpg_url[:jpg_url.find('"')]

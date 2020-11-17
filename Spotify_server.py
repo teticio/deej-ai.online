@@ -274,7 +274,10 @@ if __name__ == '__main__':
     download_file_from_google_drive('1LM1WW1GCGKeFD1AAHS8ijNwahqH4r4xV',
                                     'speccy_model')
 
-    mp3tovecs = pickle.load(open('spotifytovec.p', 'rb'))
+    if len(sys.argv) > 2 and sys.argv[2] == 'test':
+        mp3tovecs = pickle.load(open('spotifytovec_2.p', 'rb'))
+    else:
+        mp3tovecs = pickle.load(open('spotifytovec.p', 'rb'))
     mp3tovecs = dict(
         zip(mp3tovecs.keys(),
             [mp3tovecs[_] / np.linalg.norm(mp3tovecs[_]) for _ in mp3tovecs]))

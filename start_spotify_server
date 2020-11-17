@@ -1,4 +1,4 @@
 #!/bin/bash
 source activate
-python Spotify_server.py $1 &>> server.log
+python Spotify_server.py $1 $2 &>> server.log
 

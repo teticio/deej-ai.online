@@ -12,15 +12,28 @@
     $api->setSession($session);
     $api->setOptions(['auto_refresh' => true]);
 
-    // make sure spotify server is running
-    $port = ($_SERVER['HTTP_HOST'] != 'localhost')? 5123: 5125;
-    $spotify_server = 'http://localhost:' . $port . '/spotify_server';
-    $connection = @fsockopen('localhost', $port);
-    if (is_resource($connection)) {
-        fclose($connection);
+    if (isset($_GET['test'])) {
+        // make sure spotify server is running
+        $port = ($_SERVER['HTTP_HOST'] != 'localhost')? 5133: 5135;
+        $spotify_server = 'http://localhost:' . $port . '/spotify_server';
+        $connection = @fsockopen('localhost', $port);
+        if (is_resource($connection)) {
+            fclose($connection);
+        } else {
+            $output = exec('(cd ..; NUMBA_CACHE_DIR=/tmp ./start_spotify_server ' . $port . ' test > /dev/null 2> /dev/null &)');
+            sleep(20);
+        }
     } else {
-        $output = exec('(cd ..; NUMBA_CACHE_DIR=/tmp ./start_spotify_server ' . $port . ' > /dev/null 2> /dev/null &)');
-        sleep(20);
+        // make sure spotify server is running
+        $port = ($_SERVER['HTTP_HOST'] != 'localhost')? 5123: 5125;
+        $spotify_server = 'http://localhost:' . $port . '/spotify_server';
+        $connection = @fsockopen('localhost', $port);
+        if (is_resource($connection)) {
+            fclose($connection);
+        } else {
+            $output = exec('(cd ..; NUMBA_CACHE_DIR=/tmp ./start_spotify_server ' . $port . ' > /dev/null 2> /dev/null &)');
+            sleep(20);
+        }
     }
     $curlopts = [
         CURLOPT_RETURNTRANSFER => true,
@@ -178,7 +191,7 @@
                     $item = $current_track->item;
                     if ($item) {
                         print json_encode([
-                            $item->preview_url,
+                            $api->getTrack($item->id)->preview_url,
                             $item->artists[0]->name,
                             $item->name
                         ]);
