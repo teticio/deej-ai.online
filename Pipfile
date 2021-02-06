@@ -23,6 +23,7 @@ yapf = "*"
 tensorflow-gpu = "==1.14"
 numba = "==0.48"
 tqdm = "*"
+h5py = "2.10.0"
 
 [requires]
 python_version = "3.6"
