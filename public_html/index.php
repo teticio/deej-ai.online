@@ -5,7 +5,7 @@
     $session = new SpotifyWebAPI\Session(
         $credentials->{'spotify_client_id'},
         $credentials->{'spotify_client_secret'},
-        $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/'
+        $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['CONTEXT_PREFIX'] . '/'
     );
 
     $api = new SpotifyWebAPI\SpotifyWebAPI();
@@ -134,7 +134,7 @@
     if (isset($_GET['code'])) {
         // get refresh token from callback url code
         $session->requestAccessToken($_GET['code']);
-        header('Location: https://' . $_SERVER['SERVER_NAME'] . '?' . http_build_query([
+        header('Location: https://' . $_SERVER['SERVER_NAME'] . '/' . $_SERVER['CONTEXT_PREFIX'] . '?' . http_build_query([
             'token' => $session->getRefreshToken()
         ]));
         die();
